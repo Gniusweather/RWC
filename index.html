@@ -3,270 +3,539 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>METAR Dashboard — Manual TAF/SYNOP + Stations Dashboard</title>
+<title>Regional Weather Centre — METAR Dashboard</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Barlow+Condensed:wght@300;400;500;600;700;800&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
 
 <style>
 :root{
-  --bg:#001020;
-  --panel:#0f2430;
-  --card:rgba(0,0,40,0.92);
-  --border:rgba(70,130,180,0.18);
-  --text:#eef2f7;
-  --muted:#9aa0a6;
+  --bg:#020d18;
+  --panel:#061828;
+  --card:rgba(6,24,42,0.96);
+  --border:rgba(55,130,200,0.14);
+  --border-bright:rgba(85,193,255,0.22);
+  --text:#ddeeff;
+  --muted:#6a8aaa;
   --accent:#55c1ff;
   --accent-strong:#1b7cff;
-  --alert:#ff6b6b;
-  --ok:#5dd18b;
+  --accent-dim:rgba(85,193,255,0.12);
+  --alert:#ff5f5f;
+  --alert-dim:rgba(255,95,95,0.08);
+  --ok:#3fcf82;
+  --ok-dim:rgba(63,207,130,0.08);
+  --warn:#f59e0b;
   --radius:10px;
-  --shadow:0 10px 30px rgba(0,0,0,0.45);
-  --widget-width:260px;
-  --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", "Courier New", monospace;
+  --radius-lg:14px;
+  --shadow:0 16px 40px rgba(0,0,0,0.55);
+  --shadow-sm:0 4px 16px rgba(0,0,0,0.35);
+  --widget-width:270px;
+  --mono:'Space Mono', ui-monospace, monospace;
+  --sans:'Barlow', system-ui, sans-serif;
+  --cond:'Barlow Condensed', system-ui, sans-serif;
   --dashboard-blue: #062a6f;
+  --glow-accent: 0 0 24px rgba(85,193,255,0.12);
+  --glow-alert: 0 0 20px rgba(255,95,95,0.18);
 }
-html,body{height:100%;margin:0;background:radial-gradient(1200px 600px at 10% -10%, rgba(123,97,255,0.04), transparent 60%), var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial;-webkit-text-size-adjust:100%;}
-.page{width:100%;box-sizing:border-box;padding:12px 16px;display:flex;flex-direction:column;align-items:center;gap:12px;}
-.top-row{width:100%;max-width:1200px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
-.weather-widget{width:var(--widget-width);border-radius:var(--radius);background:var(--card);box-shadow:var(--shadow);border:1px solid var(--border);overflow:hidden;}
-.widget-head{padding:12px;display:flex;gap:8px;align-items:center;background:linear-gradient(90deg,var(--accent-strong),#7a5cff);}
-.widget-head .title{font-weight:700;font-size:14px;color:#fff;}
-.content{padding:12px;font-size:13px;color:var(--text);}
-.vis-wrap{display:flex;gap:8px;align-items:center;}
-.status-dot{width:10px;height:10px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 2px rgba(93,209,139,0.12);}
-.status-dot.low{background:var(--alert);box-shadow:0 0 0 2px rgba(255,107,107,0.12);}
-.vis-value{font-weight:800;font-size:1.05rem;min-width:72px;text-align:left;}
-.timestamp{margin-top:6px;color:var(--muted);font-size:12px;display:block;}
-.btn-blue{padding:6px 10px;border-radius:8px;border:1px solid rgba(27,124,255,0.18);background:linear-gradient(180deg,var(--accent-strong),#2a9bff);color:#fff;cursor:pointer;font-weight:700;font-size:13px;box-shadow:0 6px 18px rgba(27,124,255,0.12);height:34px;display:inline-flex;align-items:center;gap:8px;}
-.btn-blue[disabled]{opacity:.6;cursor:not-allowed;}
-.header-block{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;}
-.header-title{font-size:16px;color:var(--accent);font-weight:800;margin:0;}
-.header-clocks{display:flex;gap:18px;align-items:center;color:var(--muted);font-size:13px;}
-.clock-group{display:flex;flex-direction:column;align-items:center;gap:4px;}
-.clock-time{font-size:26px;color:var(--text);font-weight:800;letter-spacing:0.6px;}
-.clock-date{font-size:14px;color:var(--muted);}
-.controls-wrap{display:flex;gap:8px;align-items:center;}
-.controls-wrap button{padding:6px 8px;border-radius:8px;border:1px solid rgba(32,52,63,0.6);background:var(--panel);color:var(--accent);cursor:pointer;font-size:12px;height:34px;}
-.content-wrapper{width:100%;max-width:1200px;box-sizing:border-box;}
-.table-wrapper{width:100%;margin:10px 0;padding:0;box-sizing:border-box;}
-.section-controls{display:flex;justify-content:flex-end;gap:8px;margin-bottom:10px;align-items:center;}
-table{width:100%;border-collapse:collapse;font-family:var(--mono);color:var(--text);font-size:20px;}
-th,td{padding:10px 12px;border:2px solid rgba(32,52,63,0.6);text-align:center;vertical-align:middle;}
-th{background:#0c3146;color:var(--accent);font-weight:800;font-size:13px;text-transform:uppercase;}
-td.station{font-weight:900;color:var(--accent);font-size:20px;text-align:left;padding-left:16px;}
-tr.stale{opacity:.6;}
-td.alert{border:3px solid var(--alert) !important;}
-tr.raw td{background:#0b2a33;text-align:left;color:var(--muted);padding:12px;white-space:pre-wrap;font-size:14px;}
-.raw-current{font-size:14px;color:var(--text);display:block;white-space:pre-wrap;}
-.raw-past{margin-top:8px;font-size:15px;color:var(--text);display:block;font-weight:700;}
-.time-updated{background:var(--dashboard-blue) !important;color:#eaf6ff !important;font-weight:800;transition:background 0.6s, color 0.6s, opacity 0.6s;}
-.time-updated.dim{opacity:0.45 !important;}
-td.clouds.cloud-critical{border:3px solid var(--alert) !important;box-shadow:0 0 18px rgba(255,107,107,0.16) inset;background:rgba(255,107,107,0.03);}
-td.wx.wx-critical{border:3px solid var(--alert) !important;box-shadow:0 0 8px rgba(255,107,107,0.06) inset;}
-#taf-table, #synop-table { font-size: 16px; }
-#taf-table th, #synop-table th { font-size: 14px; padding:10px 12px; }
-#taf-table td, #synop-table td { font-size: 15px; padding:10px 12px; color:var(--muted); }
-.taf-raw, .synop-raw { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", "Courier New", monospace; font-size:16px; color:var(--text); white-space:pre-wrap; word-break:break-word; }
-.footer{width:100%;max-width:1200px;margin-top:18px;color:var(--muted);font-size:13px;display:flex;align-items:center;justify-content:space-between;padding:12px 0;box-sizing:border-box;}
-.hidden-row{display:none !important;}
-.flash-blue{animation:flashBlue 600ms ease-in-out}
-@keyframes flashBlue{0%{background:rgba(27,124,255,0.12)}50%{background:rgba(27,124,255,0.22)}100%{background:transparent}}
-/* Stations dashboard styles */
-.stations-card{margin-top:12px;padding:12px;border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid rgba(75,150,220,0.06);}
-.stations{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:12px;margin-top:12px}
-.station-row{display:flex;flex-direction:column;gap:10px;padding:12px;border-radius:10px;background:linear-gradient(180deg, rgba(43,156,255,0.03), rgba(11,34,54,0.02));border:1px solid rgba(255,255,255,0.03)}
-.station-top{display:flex;justify-content:space-between;align-items:center}
-.station-left{display:flex;gap:12px;align-items:center}
-.station-name{font-weight:700;color:var(--accent)}
-.param{background:rgba(255,255,255,0.02);padding:6px 10px;border-radius:8px;font-size:13px;color:var(--muted);display:inline-flex;align-items:center;gap:8px}
-.param .value{font-weight:700;color:#e6f6ff}
-.wind-rose{width:72px;height:72px;flex:0 0 72px}
-.wind-rose svg{width:100%;height:100%}
-.map-container{height:64vh;border-radius:10px;overflow:hidden;margin-top:12px}
-#map{width:100%;height:100%}
-.legend{background:rgba(0,0,0,0.35);padding:8px;border-radius:8px;color:#e6f6ff;font-size:13px}
-.legend .row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
-.dot{width:12px;height:12px;border-radius:50%}
-.dot.ok{background:var(--ok)}
-.dot.warn{background:var(--alert)}
-.dot.danger{background:#ff8a5b}
-.dot.error{background:#ffb3c7}
+
+*,*::before,*::after{box-sizing:border-box;}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);-webkit-text-size-adjust:100%;overflow-x:hidden;}
+
+/* Atmospheric background */
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(ellipse 900px 500px at 10% 0%, rgba(27,124,255,0.06) 0%, transparent 60%),
+    radial-gradient(ellipse 600px 400px at 90% 80%, rgba(85,193,255,0.04) 0%, transparent 55%),
+    radial-gradient(ellipse 400px 300px at 50% 40%, rgba(63,207,130,0.02) 0%, transparent 60%);
+}
+
+/* Scanline overlay */
+body::after{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
+}
+
+.page{width:100%;position:relative;z-index:1;padding:14px 18px;display:flex;flex-direction:column;align-items:center;gap:14px;min-height:100vh;}
+
+/* ── TOP ROW ── */
+.top-row{width:100%;max-width:1240px;display:grid;grid-template-columns:var(--widget-width) 1fr auto;align-items:center;gap:14px;}
+
+/* ── WIDGET ── */
+.weather-widget{
+  border-radius:var(--radius-lg);background:var(--card);
+  box-shadow:var(--shadow),var(--glow-accent);
+  border:1px solid var(--border-bright);overflow:hidden;
+  position:relative;
+}
+.weather-widget::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--accent-strong),var(--accent),transparent);
+}
+.widget-head{
+  padding:11px 14px;display:flex;gap:10px;align-items:center;
+  background:linear-gradient(90deg,rgba(27,124,255,0.18),rgba(27,124,255,0.04));
+  border-bottom:1px solid var(--border);
+}
+.widget-head .icon{font-size:18px;line-height:1;}
+.widget-head .title{font-family:var(--cond);font-weight:700;font-size:15px;letter-spacing:0.5px;color:var(--accent);text-transform:uppercase;}
+.widget-content{padding:14px;}
+.vis-wrap{display:flex;align-items:center;gap:10px;}
+.status-dot{
+  width:9px;height:9px;border-radius:50%;background:var(--ok);flex-shrink:0;
+  box-shadow:0 0 0 3px var(--ok-dim),0 0 8px var(--ok);
+  animation:pulse-ok 2.5s ease-in-out infinite;
+}
+.status-dot.low{
+  background:var(--alert);box-shadow:0 0 0 3px var(--alert-dim),0 0 8px var(--alert);
+  animation:pulse-alert 1.2s ease-in-out infinite;
+}
+@keyframes pulse-ok{0%,100%{opacity:1}50%{opacity:0.6}}
+@keyframes pulse-alert{0%,100%{opacity:1}50%{opacity:0.4}}
+
+.vis-value{font-family:var(--cond);font-weight:800;font-size:1.7rem;letter-spacing:0.5px;line-height:1;color:#fff;}
+.vis-unit{font-family:var(--cond);font-weight:400;font-size:1rem;color:var(--muted);margin-left:2px;}
+.timestamp{margin-top:5px;color:var(--muted);font-size:11px;font-family:var(--mono);display:block;letter-spacing:0.3px;}
+
+/* ── HEADER BLOCK ── */
+.header-block{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;}
+.header-title{
+  font-family:var(--cond);font-size:22px;letter-spacing:2px;font-weight:800;
+  color:var(--accent);text-transform:uppercase;margin:0;
+  text-shadow:0 0 30px rgba(85,193,255,0.3);
+}
+.header-sub{font-family:var(--cond);font-size:11px;letter-spacing:3px;font-weight:400;color:var(--muted);text-transform:uppercase;}
+.header-clocks{display:flex;gap:28px;align-items:center;}
+.clock-group{display:flex;flex-direction:column;align-items:center;gap:2px;}
+.clock-label{font-family:var(--cond);font-size:10px;letter-spacing:2.5px;color:var(--muted);text-transform:uppercase;}
+.clock-time{
+  font-family:var(--mono);font-size:28px;color:#fff;font-weight:700;letter-spacing:1px;
+  text-shadow:0 0 20px rgba(85,193,255,0.25);
+}
+.clock-date{font-family:var(--cond);font-size:12px;color:var(--muted);letter-spacing:0.5px;}
+.clock-sep{width:1px;height:44px;background:linear-gradient(180deg,transparent,var(--border-bright),transparent);}
+
+/* ── CONTROLS ── */
+.controls-wrap{display:flex;flex-direction:column;gap:7px;align-items:flex-end;}
+.btn-primary{
+  padding:8px 14px;border-radius:8px;border:1px solid rgba(27,124,255,0.3);
+  background:linear-gradient(180deg,rgba(27,124,255,0.9),rgba(11,90,200,0.9));
+  color:#fff;cursor:pointer;font-family:var(--cond);font-weight:700;font-size:13px;
+  letter-spacing:0.8px;text-transform:uppercase;
+  box-shadow:0 4px 14px rgba(27,124,255,0.25),inset 0 1px 0 rgba(255,255,255,0.12);
+  height:34px;display:inline-flex;align-items:center;gap:8px;
+  transition:all 0.15s ease;white-space:nowrap;
+}
+.btn-primary:hover{background:linear-gradient(180deg,rgba(40,140,255,0.95),rgba(20,100,220,0.95));box-shadow:0 6px 20px rgba(27,124,255,0.35);}
+.btn-primary:active{transform:translateY(1px);}
+.btn-primary[disabled]{opacity:.5;cursor:not-allowed;}
+.btn-ghost{
+  padding:7px 12px;border-radius:8px;border:1px solid var(--border);
+  background:rgba(255,255,255,0.02);color:var(--accent);cursor:pointer;
+  font-family:var(--cond);font-size:12px;letter-spacing:0.8px;text-transform:uppercase;
+  font-weight:600;height:34px;transition:all 0.15s ease;white-space:nowrap;
+}
+.btn-ghost:hover{background:rgba(85,193,255,0.06);border-color:var(--border-bright);}
+.btn-row{display:flex;gap:7px;align-items:center;}
+
+/* ── CONTENT WRAPPER ── */
+.content-wrapper{width:100%;max-width:1240px;}
+.table-wrapper{width:100%;margin:10px 0;padding:0;}
+
+/* ── SECTION HEADER ── */
+.section-header{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-bottom:10px;padding:0 2px;
+}
+.section-title{
+  font-family:var(--cond);font-size:13px;font-weight:700;letter-spacing:2.5px;
+  text-transform:uppercase;color:var(--muted);
+  display:flex;align-items:center;gap:8px;
+}
+.section-title::before{
+  content:'';width:16px;height:2px;
+  background:linear-gradient(90deg,var(--accent-strong),transparent);
+  border-radius:2px;
+}
+.section-controls{display:flex;gap:8px;align-items:center;}
+
+/* ── TABLES ── */
+.table-card{
+  border-radius:var(--radius-lg);overflow:hidden;
+  border:1px solid var(--border);
+  box-shadow:var(--shadow-sm);
+  background:rgba(6,24,42,0.6);
+  backdrop-filter:blur(8px);
+}
+table{width:100%;border-collapse:collapse;font-family:var(--mono);color:var(--text);font-size:18px;}
+thead{position:sticky;top:0;z-index:2;}
+th{
+  background:rgba(8,30,56,0.97);color:var(--muted);font-weight:700;
+  font-size:10px;text-transform:uppercase;letter-spacing:2px;padding:11px 14px;
+  border-bottom:1px solid var(--border-bright);font-family:var(--cond);
+  text-align:center;white-space:nowrap;
+}
+th:first-child{text-align:left;padding-left:18px;}
+td{
+  padding:13px 14px;border-bottom:1px solid rgba(32,52,80,0.5);
+  text-align:center;vertical-align:middle;font-size:16px;
+  transition:background 0.2s;
+}
+td:first-child{text-align:left;padding-left:18px;}
+tr:last-child td{border-bottom:none;}
+tbody tr:hover td{background:rgba(85,193,255,0.03);}
+
+td.station{
+  font-family:var(--cond);font-weight:800;color:var(--accent);font-size:20px;
+  letter-spacing:1px;
+}
+td.time{font-size:14px;color:var(--muted);font-family:var(--mono);}
+td.wind{font-size:15px;}
+td.clouds{font-size:14px;color:var(--muted);}
+
+/* Status cells */
+tr.stale td{opacity:.5;}
+tr.stale td.station::after{content:' ∅';font-size:12px;color:var(--alert);}
+td.alert{
+  color:var(--alert) !important;
+  background:var(--alert-dim) !important;
+}
+td.clouds.cloud-critical{
+  color:var(--alert) !important;background:var(--alert-dim) !important;
+  box-shadow:inset 0 0 16px rgba(255,95,95,0.08);
+}
+td.wx.wx-critical{color:var(--alert) !important;background:var(--alert-dim) !important;}
+
+/* Time updated highlight */
+.time-updated{
+  background:rgba(27,124,255,0.18) !important;color:#fff !important;
+  font-weight:700;transition:all 0.6s;
+}
+.time-updated.dim{opacity:0.4 !important;}
+
+/* Raw rows */
+tr.raw td{
+  background:rgba(4,16,28,0.8);text-align:left;color:var(--muted);
+  padding:12px 18px;white-space:pre-wrap;font-size:12px;border-top:none;
+  border-bottom:1px solid rgba(32,52,80,0.6);font-family:var(--mono);
+  letter-spacing:0.3px;line-height:1.6;
+}
+.raw-current{font-size:12px;color:rgba(85,193,255,0.7);display:block;white-space:pre-wrap;}
+.raw-past{
+  margin-top:6px;font-size:12px;color:var(--muted);display:block;
+  padding-top:6px;border-top:1px solid rgba(32,52,80,0.5);
+}
+
+/* Last updated bar */
+.status-bar{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:8px 16px;background:rgba(4,16,28,0.5);border-top:1px solid var(--border);
+  border-radius:0 0 var(--radius-lg) var(--radius-lg);font-size:11px;color:var(--muted);
+  font-family:var(--mono);letter-spacing:0.3px;
+}
+.status-bar .dot-live{
+  width:6px;height:6px;border-radius:50%;background:var(--ok);
+  display:inline-block;margin-right:6px;
+  box-shadow:0 0 6px var(--ok);animation:pulse-ok 2s infinite;
+}
+
+/* TAF / SYNOP smaller tables */
+#taf-table,#synop-table{font-size:15px;}
+#taf-table th,#synop-table th{font-size:10px;padding:9px 14px;}
+#taf-table td,#synop-table td{font-size:13px;padding:12px 14px;color:var(--muted);}
+.taf-raw,.synop-raw{
+  font-family:var(--mono);font-size:13px;color:rgba(170,200,230,0.8);
+  white-space:pre-wrap;word-break:break-word;line-height:1.65;letter-spacing:0.3px;
+}
+
+/* ── STATIONS DASHBOARD ── */
+.stations-card{
+  margin-top:8px;padding:16px;border-radius:var(--radius-lg);
+  background:rgba(6,24,42,0.6);border:1px solid var(--border);
+  backdrop-filter:blur(8px);
+}
+.stations-header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px;}
+.stations-title{font-family:var(--cond);font-size:18px;font-weight:800;letter-spacing:1.5px;color:var(--accent);text-transform:uppercase;}
+.stations-sub{font-family:var(--cond);font-size:11px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-top:2px;}
+.stations{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:12px;}
+
+.station-row{
+  padding:14px;border-radius:10px;
+  background:linear-gradient(135deg,rgba(10,30,54,0.9),rgba(6,20,38,0.9));
+  border:1px solid rgba(55,130,200,0.1);
+  transition:all 0.2s ease;position:relative;overflow:hidden;
+}
+.station-row::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(85,193,255,0.2),transparent);
+}
+.station-row:hover{border-color:rgba(85,193,255,0.18);background:linear-gradient(135deg,rgba(12,35,60,0.95),rgba(8,24,44,0.95));}
+.station-top{display:flex;justify-content:space-between;align-items:center;}
+.station-name{font-family:var(--cond);font-weight:700;font-size:15px;color:var(--accent);letter-spacing:0.5px;}
+.station-time{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:2px;}
+.param{
+  background:rgba(255,255,255,0.03);padding:7px 11px;border-radius:7px;
+  font-size:12px;color:var(--muted);display:inline-flex;flex-direction:column;
+  align-items:center;gap:2px;border:1px solid rgba(255,255,255,0.04);
+}
+.param .label{font-family:var(--cond);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);}
+.param .value{font-family:var(--cond);font-weight:700;font-size:16px;color:#d0e8ff;}
+.params-row{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px;}
+.wind-rose{width:70px;height:70px;flex-shrink:0;}
+.wind-rose svg{width:100%;height:100%;}
+
+/* Summary pills */
+.summary{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;}
+.pill{
+  padding:5px 12px;border-radius:20px;background:rgba(255,255,255,0.03);
+  border:1px solid var(--border);font-family:var(--cond);font-size:12px;
+  color:var(--muted);letter-spacing:0.5px;
+}
+.pill span{color:var(--accent);font-weight:700;}
+
+/* Map */
+.map-container{height:58vh;border-radius:10px;overflow:hidden;margin-top:12px;border:1px solid var(--border);}
+#map{width:100%;height:100%;}
+.legend{
+  background:rgba(6,18,34,0.92);padding:10px 12px;border-radius:8px;
+  color:var(--text);font-family:var(--cond);font-size:12px;
+  border:1px solid var(--border);backdrop-filter:blur(8px);
+}
+.legend .row{display:flex;align-items:center;gap:8px;margin-bottom:5px;letter-spacing:0.3px;}
+.legend .row:last-child{margin-bottom:0;}
+.dot{width:11px;height:11px;border-radius:50%;flex-shrink:0;}
+.dot.ok{background:var(--ok);box-shadow:0 0 6px var(--ok);}
+.dot.warn{background:var(--alert);box-shadow:0 0 6px var(--alert);}
+.dot.danger{background:#ff8a5b;box-shadow:0 0 6px #ff8a5b;}
+.dot.error{background:#ffb3c7;box-shadow:0 0 6px #ffb3c7;}
+
+/* Map search */
+.map-search{
+  padding:8px 12px;border-radius:8px;border:1px solid var(--border);
+  background:rgba(255,255,255,0.04);color:var(--text);font-family:var(--sans);
+  font-size:13px;width:240px;outline:none;transition:border-color 0.2s;
+}
+.map-search:focus{border-color:var(--border-bright);}
+.map-search::placeholder{color:var(--muted);}
+
+/* ── FOOTER ── */
+.footer{
+  width:100%;max-width:1240px;margin-top:20px;padding:14px 0;
+  display:flex;align-items:center;justify-content:space-between;
+  border-top:1px solid rgba(55,130,200,0.08);
+}
+.footer-brand{font-family:var(--cond);font-size:13px;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;}
+.footer-note{font-family:var(--sans);font-size:11px;color:rgba(106,138,170,0.6);letter-spacing:0.3px;}
+
+/* ── ANIMATIONS ── */
 .hidden{display:none !important;}
-@media (max-width:920px){
-  .top-row{flex-direction:column;align-items:stretch;gap:10px;}
+.hidden-row{display:none !important;}
+.flash-blue{animation:flashBlue 500ms ease-in-out;}
+@keyframes flashBlue{
+  0%{background:rgba(27,124,255,0.2);}
+  50%{background:rgba(27,124,255,0.3);}
+  100%{background:transparent;}
+}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+.fade-in{animation:fadeIn 0.3s ease-out both;}
+
+/* ── RESPONSIVE ── */
+@media(max-width:960px){
+  .top-row{grid-template-columns:1fr;gap:10px;}
   .weather-widget{width:100%;}
-  table{font-size:18px;}
-  .header-clocks{gap:10px;}
-  #taf-table, #synop-table { font-size: 15px; }
-  #taf-table td, #synop-table td { font-size: 14px; }
-  .taf-raw, .synop-raw { font-size:15px; }
+  .header-clocks{gap:16px;}
+  table{font-size:15px;}
+  td{font-size:13px;padding:10px 10px;}
+  td.station{font-size:17px;}
+  .clock-time{font-size:22px;}
+  #taf-table td,#synop-table td{font-size:12px;}
 }
 </style>
-
-<!-- Leaflet CSS for map -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
-
 </head>
 <body>
 <div class="page" id="pageRoot">
+
+  <!-- ═══ TOP ROW ═══ -->
   <div class="top-row" role="banner">
-    <div class="weather-widget" id="bonaire-vis-widget" title="Bonaire visibility" tabindex="0" aria-live="polite" role="region" aria-label="Bonaire visibility">
+    <!-- Vis Widget -->
+    <div class="weather-widget" id="bonaire-vis-widget" tabindex="0" aria-live="polite" role="region" aria-label="Bonaire visibility">
       <div class="widget-head">
-        <div style="width:20px;height:20px;display:grid;place-items:center" aria-hidden="true">👁️‍🗨️</div>
-        <div class="title">Bonaire Visibility</div>
+        <span class="icon">👁</span>
+        <span class="title">Bonaire Visibility</span>
       </div>
-      <div class="content">
-        <div style="display:flex;align-items:center;justify-content:space-between">
-          <div class="vis-wrap" aria-hidden="false">
-            <div id="vis-status" class="status-dot" aria-hidden="true"></div>
-            <div style="display:flex;flex-direction:column;align-items:flex-start">
+      <div class="widget-content">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+          <div class="vis-wrap">
+            <div id="vis-status" class="status-dot"></div>
+            <div>
               <div id="vis-value" class="vis-value" role="status" aria-live="polite">—</div>
-              <div id="vis-timestamp" class="timestamp" aria-hidden="true" style="display:none"></div>
+              <span id="vis-timestamp" class="timestamp" style="display:none"></span>
             </div>
           </div>
-          <div style="display:flex;align-items:center;gap:8px">
-            <button id="vis-refresh-btn" class="btn-blue" aria-label="Refresh Bonaire visibility">Refresh Vis</button>
-          </div>
+          <button id="vis-refresh-btn" class="btn-primary" aria-label="Refresh Bonaire visibility" style="font-size:11px;padding:6px 10px;height:30px;">↻ Refresh</button>
         </div>
       </div>
     </div>
 
+    <!-- Header -->
     <div class="header-block" role="region" aria-label="Regional header">
-      <div class="header-title">Regional Weather Centre</div>
+      <div style="text-align:center;margin-bottom:4px;">
+        <div class="header-sub">Caribbean</div>
+        <div class="header-title">Regional Weather Centre</div>
+      </div>
       <div class="header-clocks" aria-hidden="false">
-        <div class="clock-group" aria-label="Local time">
-          <div style="font-size:12px;color:var(--muted)">Local</div>
+        <div class="clock-group">
+          <div class="clock-label">Local</div>
           <div id="local-clock" class="clock-time">--:--:--</div>
           <div id="local-date" class="clock-date">--</div>
         </div>
-        <div class="clock-group" aria-label="UTC time">
-          <div style="font-size:12px;color:var(--muted)">UTC</div>
+        <div class="clock-sep"></div>
+        <div class="clock-group">
+          <div class="clock-label">UTC</div>
           <div id="utc-clock" class="clock-time">--:--:--</div>
           <div id="utc-date" class="clock-date">--</div>
         </div>
       </div>
     </div>
 
+    <!-- Controls -->
     <div class="controls-wrap" role="toolbar" aria-label="Controls">
-      <button id="mute-btn" aria-pressed="false">Mute Beep</button>
-      <button id="refresh-btn" class="btn-blue" title="Refresh METARs & Vis">Refresh METARs & Vis</button>
-      <button id="test-btn">Enter Test Mode</button>
+      <div class="btn-row">
+        <button id="mute-btn" class="btn-ghost" aria-pressed="false">🔊 Mute</button>
+        <button id="test-btn" class="btn-ghost">⚗ Test Mode</button>
+      </div>
+      <button id="refresh-btn" class="btn-primary" title="Refresh METARs & Vis">↻ Refresh All</button>
     </div>
   </div>
 
+  <!-- ═══ CONTENT ═══ -->
   <div class="content-wrapper">
-    <!-- METAR / TAF / SYNOP Dashboard (original) -->
-    <div id="metarSection" class="table-wrapper">
-      <div class="section-controls" aria-label="METAR controls">
-        <button id="metar-refresh-btn" class="btn-blue" title="Refresh METAR section">Refresh METAR</button>
-        <button id="switchToStations" style="padding:6px 10px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--accent);">Open Stations Dashboard</button>
+
+    <!-- METAR Section -->
+    <div id="metarSection" class="table-wrapper fade-in">
+      <div class="section-header">
+        <div class="section-title">METAR Observations</div>
+        <div class="section-controls">
+          <button id="metar-refresh-btn" class="btn-primary" style="font-size:11px;height:30px;padding:6px 12px;" title="Refresh METAR">↻ METAR</button>
+          <button id="switchToStations" class="btn-ghost">⊞ Stations Dashboard</button>
+        </div>
       </div>
-
-      <table class="metar-table" aria-label="METAR list">
-        <thead>
-          <tr>
-            <th>ICAO</th><th>Time</th><th>Wind</th><th>Vis</th><th>Wx</th><th>Clouds</th><th>Temp/Dew</th><th>QNH</th>
-          </tr>
-        </thead>
-        <tbody id="metar"></tbody>
-      </table>
-
-      <div id="last-updated" style="text-align:center;color:var(--muted);margin-top:8px">METAR last updated: --:--</div>
+      <div class="table-card">
+        <table class="metar-table" aria-label="METAR list">
+          <thead>
+            <tr>
+              <th>ICAO</th><th>Time (Z)</th><th>Wind</th><th>Vis</th><th>Wx</th><th>Cloud</th><th>Temp / Dew</th><th>QNH (hPa / inHg)</th>
+            </tr>
+          </thead>
+          <tbody id="metar"></tbody>
+        </table>
+        <div class="status-bar">
+          <span><span class="dot-live"></span><span id="last-updated">METAR last updated: --:--</span></span>
+          <span style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:rgba(106,138,170,0.5);">Auto-refresh every 30s</span>
+        </div>
+      </div>
     </div>
 
-    <div id="tafSection" class="table-wrapper">
-      <div class="section-controls">
-        <button id="taf-refresh-btn" class="btn-blue" title="Load TAFs manually">Load TAFs</button>
+    <!-- TAF Section -->
+    <div id="tafSection" class="table-wrapper fade-in">
+      <div class="section-header">
+        <div class="section-title">Terminal Aerodrome Forecast</div>
+        <div class="section-controls">
+          <button id="taf-refresh-btn" class="btn-primary" style="font-size:11px;height:30px;padding:6px 12px;" title="Load TAFs">↻ Load TAFs</button>
+        </div>
       </div>
-
-      <table id="taf-table" aria-label="TAF list">
-        <thead>
-          <tr><th>ICAO</th><th>Raw TAF</th></tr>
-        </thead>
-        <tbody id="taf"></tbody>
-      </table>
-
-      <div id="taf-updated" style="text-align:center;color:var(--muted);margin-top:8px">TAF last updated: --:--</div>
+      <div class="table-card">
+        <table id="taf-table" aria-label="TAF list">
+          <thead><tr><th style="text-align:left;padding-left:18px;">ICAO</th><th style="text-align:left;">Raw TAF</th></tr></thead>
+          <tbody id="taf"></tbody>
+        </table>
+        <div class="status-bar"><span id="taf-updated" style="color:var(--muted)">TAF last updated: --:--</span></div>
+      </div>
     </div>
 
-    <div id="synopSection" class="table-wrapper">
-      <div class="section-controls">
-        <button id="synop-refresh-btn" class="btn-blue" title="Load SYNOPs manually">Load SYNOPs</button>
+    <!-- SYNOP Section -->
+    <div id="synopSection" class="table-wrapper fade-in">
+      <div class="section-header">
+        <div class="section-title">SYNOP Reports</div>
+        <div class="section-controls">
+          <button id="synop-refresh-btn" class="btn-primary" style="font-size:11px;height:30px;padding:6px 12px;" title="Load SYNOPs">↻ Load SYNOPs</button>
+        </div>
       </div>
-
-      <table id="synop-table" aria-label="SYNOP list">
-        <thead>
-          <tr><th>Source</th><th>Raw SYNOP</th></tr>
-        </thead>
-        <tbody id="synop"></tbody>
-      </table>
-
-      <div id="synop-updated" style="text-align:center;color:var(--muted);margin-top:8px">SYNOP last updated: --:--</div>
+      <div class="table-card">
+        <table id="synop-table" aria-label="SYNOP list">
+          <thead><tr><th style="text-align:left;padding-left:18px;">Source</th><th style="text-align:left;">Raw SYNOP</th></tr></thead>
+          <tbody id="synop"></tbody>
+        </table>
+        <div class="status-bar"><span id="synop-updated" style="color:var(--muted)">SYNOP last updated: --:--</span></div>
+      </div>
     </div>
+
   </div>
 
-  <!-- Stations Dashboard (hidden by default) -->
-  <section id="stationsSection" class="stations-card hidden" aria-hidden="true">
-    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+  <!-- ═══ STATIONS DASHBOARD ═══ -->
+  <section id="stationsSection" class="stations-card hidden content-wrapper" aria-hidden="true">
+    <div class="stations-header">
       <div>
-        <strong style="font-size:16px;color:var(--accent)">Stations Dashboard</strong>
-        <div style="color:var(--muted);font-size:13px">All stations on one page — wind roses and map mode included</div>
+        <div class="stations-title">Stations Dashboard</div>
+        <div class="stations-sub">Live surface observations · Wind roses · Map view</div>
       </div>
-      <div style="display:flex;gap:8px;align-items:center">
-        <button id="toggleMap" class="btn-blue">Switch to Map</button>
-        <button id="backToMetar" style="padding:6px 10px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--accent);">Back to METAR</button>
-        <span id="stationsLastFetched" style="color:var(--muted);font-size:13px">Last fetched: —</span>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <span id="stationsLastFetched" style="color:var(--muted);font-size:11px;font-family:var(--mono);">Last fetched: —</span>
+        <button id="toggleMap" class="btn-primary" style="font-size:11px;height:30px;padding:6px 12px;">🗺 Map View</button>
+        <button id="backToMetar" class="btn-ghost">← Back to METAR</button>
       </div>
     </div>
 
-    <div id="stationsList" class="stations" aria-live="polite" style="margin-top:12px">
-      <div style="padding:12px;color:var(--muted)">Loading stations…</div>
+    <div id="stationsList" class="stations" aria-live="polite">
+      <div style="padding:20px;color:var(--muted);font-family:var(--cond);letter-spacing:1px;text-transform:uppercase;font-size:12px;">Loading stations…</div>
     </div>
 
-    <div class="summary" style="margin-top:12px">
+    <div class="summary">
       <div class="pill">Total: <span id="totalCount">0</span></div>
       <div class="pill">Alerts: <span id="alertCount">0</span></div>
       <div class="pill">Stale: <span id="staleCount">0</span></div>
       <div class="pill">Most recent: <span id="mostRecent">—</span></div>
     </div>
 
-    <div id="stationsMapCard" class="card hidden" style="margin-top:12px">
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
-        <div style="display:flex;gap:8px;align-items:center">
-          <input id="mapSearch" type="text" placeholder="Filter stations on map..." style="width:260px;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:var(--text)"/>
-          <span class="muted" id="mapLastFetched">Last fetched: —</span>
+    <div id="stationsMapCard" class="hidden" style="margin-top:14px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
+        <div style="display:flex;gap:10px;align-items:center;">
+          <input id="mapSearch" type="text" class="map-search" placeholder="Filter stations on map…"/>
+          <span style="color:var(--muted);font-family:var(--mono);font-size:11px;" id="mapLastFetched">Last fetched: —</span>
         </div>
         <div class="legend" id="mapLegend">
-          <div class="row"><div class="dot ok"></div><div>OK</div></div>
-          <div class="row"><div class="dot warn"></div><div>Alert</div></div>
-          <div class="row"><div class="dot danger"></div><div>Critical</div></div>
-          <div class="row"><div class="dot error"></div><div>NOT OK (date mismatch)</div></div>
+          <div class="row"><div class="dot ok"></div><span>OK</span></div>
+          <div class="row"><div class="dot warn"></div><span>Alert</span></div>
+          <div class="row"><div class="dot danger"></div><span>Critical</span></div>
+          <div class="row"><div class="dot error"></div><span>Date mismatch</span></div>
         </div>
       </div>
       <div class="map-container"><div id="map"></div></div>
     </div>
   </section>
 
-  <div class="footer" role="contentinfo" aria-label="Footer">
-    <div>Created by GNIUS</div>
-    <div style="color:var(--muted)">Bonaire visibility is taken directly from KNMI Bonaire Current page</div>
+  <!-- ═══ FOOTER ═══ -->
+  <div class="footer" role="contentinfo">
+    <div class="footer-brand">⬡ GNIUS · RWC</div>
+    <div class="footer-note">Bonaire visibility sourced from KNMI Bonaire Current · Data auto-refreshes every 30s</div>
   </div>
+
 </div>
 
-<!-- Leaflet JS for map -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
-
 <script>
 (function () {
 'use strict';
 
-/* ---------- Original METAR dashboard code (kept intact) ---------- */
-
-/* Configuration */
+/* ── CONFIG ── */
 const STATIONS = ['TNCA','TNCB','TNCC','TNCM','SVMI','SVVA'];
 const METAR_TEMPLATE = 'https://tgftp.nws.noaa.gov/data/observations/metar/stations/{ICAO}.TXT';
 const TAF_TEMPLATE = 'https://tgftp.nws.noaa.gov/data/forecasts/taf/stations/{ICAO}.TXT';
 const KNMI_BONAIRE_URL = 'https://www.knmidc.org/weather/bonaire/?Current';
-const METAR_REFRESH_MS = 30 * 1000;
-const VIS_REFRESH_MS = 60 * 1000;
+const METAR_REFRESH_MS = 30000;
+const VIS_REFRESH_MS = 60000;
 const REQUEST_TIMEOUT_MS = 12000;
 const FALLBACKS = [
   { name:'allorigins_json', prefix:'https://api.allorigins.win/get?url=' },
@@ -275,7 +544,7 @@ const FALLBACKS = [
 const MAX_RETRIES = 3;
 const BACKOFF_BASE_MS = 500;
 
-/* DOM refs */
+/* ── DOM ── */
 const metarTbody = document.getElementById('metar');
 const tafTbody = document.getElementById('taf');
 const synopTbody = document.getElementById('synop');
@@ -286,797 +555,621 @@ const visValueEl = document.getElementById('vis-value');
 const visStatusEl = document.getElementById('vis-status');
 const visTsEl = document.getElementById('vis-timestamp');
 
-/* State */
+/* ── STATE ── */
 let mute = false;
 let testMode = false;
-const metarState = {}; // per station state
+const metarState = {};
 
-/* Utilities */
+/* ── UTILS ── */
 function pad(n){ return n < 10 ? '0' + n : '' + n; }
-function formatLocalDateTimeParts(){ const d = new Date(); return { date: `${pad(d.getDate())}-${pad(d.getMonth()+1)}-${d.getFullYear()}`, time: `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}` }; }
-function formatUTCDateTimeParts(){ const d = new Date(); return { date: `${pad(d.getUTCDate())}-${pad(d.getUTCMonth()+1)}-${d.getUTCFullYear()}`, time: `${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}:${pad(d.getUTCSeconds())}` }; }
-function tickClocks(){ try{ const local = formatLocalDateTimeParts(); const utc = formatUTCDateTimeParts(); document.getElementById('local-clock').textContent = local.time; document.getElementById('local-date').textContent = local.date; document.getElementById('utc-clock').textContent = utc.time; document.getElementById('utc-date').textContent = utc.date; }catch(e){} }
+function formatLocalDateTimeParts(){ const d=new Date(); return { date:`${pad(d.getDate())}-${pad(d.getMonth()+1)}-${d.getFullYear()}`, time:`${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}` }; }
+function formatUTCDateTimeParts(){ const d=new Date(); return { date:`${pad(d.getUTCDate())}-${pad(d.getUTCMonth()+1)}-${d.getUTCFullYear()}`, time:`${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}:${pad(d.getUTCSeconds())}` }; }
+function tickClocks(){
+  try{
+    const l=formatLocalDateTimeParts(), u=formatUTCDateTimeParts();
+    document.getElementById('local-clock').textContent=l.time;
+    document.getElementById('local-date').textContent=l.date;
+    document.getElementById('utc-clock').textContent=u.time;
+    document.getElementById('utc-date').textContent=u.date;
+  }catch(e){}
+}
 tickClocks();
-setInterval(tickClocks, 1000);
+setInterval(tickClocks,1000);
 
-/* Audio */
-function playBeep(){ if(mute) return; try{ const ctx = new (window.AudioContext || window.webkitAudioContext)(); const o = ctx.createOscillator(); const g = ctx.createGain(); o.type='sine'; o.frequency.value=880; g.gain.value=0.02; o.connect(g); g.connect(ctx.destination); o.start(); setTimeout(()=>{ o.stop(); ctx.close(); },120); }catch(e){} }
-function playCriticalAlarm(){ if(mute) return; try{ const ctx = new (window.AudioContext || window.webkitAudioContext)(); const now = ctx.currentTime; const g = ctx.createGain(); g.gain.value = 0.06; g.connect(ctx.destination); const o1 = ctx.createOscillator(); o1.type = 'sawtooth'; const o2 = ctx.createOscillator(); o2.type = 'sine'; o1.frequency.setValueAtTime(520, now); o2.frequency.setValueAtTime(780, now); o1.connect(g); o2.connect(g); o1.start(now); o2.start(now); o1.frequency.exponentialRampToValueAtTime(880, now + 0.12); o2.frequency.exponentialRampToValueAtTime(1200, now + 0.12); setTimeout(() => { o1.frequency.exponentialRampToValueAtTime(520, ctx.currentTime + 0.02); o2.frequency.exponentialRampToValueAtTime(780, ctx.currentTime + 0.02); }, 140); setTimeout(() => { const t = ctx.currentTime; o1.frequency.setValueAtTime(600, t); o2.frequency.setValueAtTime(900, t); o1.frequency.exponentialRampToValueAtTime(1000, t + 0.08); o2.frequency.exponentialRampToValueAtTime(1400, t + 0.08); }, 220); setTimeout(()=>{ o1.stop(); o2.stop(); ctx.close(); }, 700); }catch(e){} }
-
-/* Fetch helpers */
-async function fetchWithTimeout(url, timeout = REQUEST_TIMEOUT_MS, opts = {}) {
-  const ctrl = new AbortController();
-  const id = setTimeout(() => ctrl.abort(), timeout);
-  try {
-    const r = await fetch(url, Object.assign({ cache: 'no-store', mode: 'cors', signal: ctrl.signal }, opts));
-    clearTimeout(id);
-    return r;
-  } catch (e) {
-    clearTimeout(id);
-    throw e;
-  }
+/* ── AUDIO ── */
+function playBeep(){
+  if(mute) return;
+  try{
+    const ctx=new(window.AudioContext||window.webkitAudioContext)();
+    const o=ctx.createOscillator(),g=ctx.createGain();
+    o.type='sine';o.frequency.value=880;g.gain.value=0.015;
+    o.connect(g);g.connect(ctx.destination);o.start();
+    setTimeout(()=>{o.stop();ctx.close();},100);
+  }catch(e){}
+}
+function playCriticalAlarm(){
+  if(mute) return;
+  try{
+    const ctx=new(window.AudioContext||window.webkitAudioContext)();
+    const now=ctx.currentTime,g=ctx.createGain();
+    g.gain.value=0.05;g.connect(ctx.destination);
+    const o1=ctx.createOscillator(),o2=ctx.createOscillator();
+    o1.type='sawtooth';o2.type='sine';
+    o1.frequency.setValueAtTime(520,now);o2.frequency.setValueAtTime(780,now);
+    o1.connect(g);o2.connect(g);o1.start(now);o2.start(now);
+    o1.frequency.exponentialRampToValueAtTime(880,now+0.12);
+    o2.frequency.exponentialRampToValueAtTime(1200,now+0.12);
+    setTimeout(()=>{o1.frequency.exponentialRampToValueAtTime(520,ctx.currentTime+0.02);o2.frequency.exponentialRampToValueAtTime(780,ctx.currentTime+0.02);},140);
+    setTimeout(()=>{const t=ctx.currentTime;o1.frequency.setValueAtTime(600,t);o2.frequency.setValueAtTime(900,t);o1.frequency.exponentialRampToValueAtTime(1000,t+0.08);o2.frequency.exponentialRampToValueAtTime(1400,t+0.08);},220);
+    setTimeout(()=>{o1.stop();o2.stop();ctx.close();},700);
+  }catch(e){}
 }
 
+/* ── FETCH ── */
+async function fetchWithTimeout(url,timeout=REQUEST_TIMEOUT_MS,opts={}){
+  const ctrl=new AbortController(),id=setTimeout(()=>ctrl.abort(),timeout);
+  try{ const r=await fetch(url,Object.assign({cache:'no-store',mode:'cors',signal:ctrl.signal},opts)); clearTimeout(id); return r; }
+  catch(e){ clearTimeout(id); throw e; }
+}
 async function robustFetchText(url){
-  try {
-    const r = await fetchWithTimeout(url, REQUEST_TIMEOUT_MS);
-    if (r && r.ok) {
-      const txt = await r.text();
-      if (txt && txt.trim()) return { ok:true, text: txt.trim() };
-    }
-  } catch(e){ /* continue to proxies */ }
-
-  try {
-    const proxy = FALLBACKS[0].prefix + encodeURIComponent(url);
-    const r = await fetchWithTimeout(proxy, REQUEST_TIMEOUT_MS);
-    if (r && r.ok) {
-      const j = await r.json();
-      if (j && typeof j.contents === 'string' && j.contents.trim()) return { ok:true, text: j.contents.trim() };
-    }
-  } catch(e){ /* continue */ }
-
-  try {
-    const proxy2 = FALLBACKS[1].prefix + url.replace(/^https?:\/\//,'');
-    const r2 = await fetchWithTimeout(proxy2, REQUEST_TIMEOUT_MS * 2);
-    if (r2 && r2.ok) {
-      const txt2 = await r2.text();
-      if (txt2 && txt2.trim()) return { ok:true, text: txt2.trim() };
-    }
-  } catch(e){ /* continue */ }
-
-  return { ok:false, error:'no content' };
+  try{ const r=await fetchWithTimeout(url,REQUEST_TIMEOUT_MS); if(r&&r.ok){const t=await r.text();if(t&&t.trim())return{ok:true,text:t.trim()};} }catch(e){}
+  try{ const p=FALLBACKS[0].prefix+encodeURIComponent(url),r=await fetchWithTimeout(p,REQUEST_TIMEOUT_MS); if(r&&r.ok){const j=await r.json();if(j&&typeof j.contents==='string'&&j.contents.trim())return{ok:true,text:j.contents.trim()};} }catch(e){}
+  try{ const p2=FALLBACKS[1].prefix+url.replace(/^https?:\/\//,''),r2=await fetchWithTimeout(p2,REQUEST_TIMEOUT_MS*2); if(r2&&r2.ok){const t2=await r2.text();if(t2&&t2.trim())return{ok:true,text:t2.trim()};} }catch(e){}
+  return{ok:false,error:'no content'};
 }
-
-async function fetchWithRetries(url, attempts = MAX_RETRIES){
-  let lastErr = null;
-  for (let i = 0; i < attempts; i++){
-    try {
-      const out = await robustFetchText(url);
-      if (out && out.ok && out.text) return out;
-      lastErr = out && out.error ? new Error(out.error) : new Error('No content');
-    } catch (err) {
-      lastErr = err;
-    }
-    const backoff = BACKOFF_BASE_MS * Math.pow(2, i);
-    const jitter = Math.floor(Math.random() * Math.min(500, backoff));
-    await new Promise(r => setTimeout(r, backoff + jitter));
+async function fetchWithRetries(url,attempts=MAX_RETRIES){
+  let lastErr=null;
+  for(let i=0;i<attempts;i++){
+    try{ const o=await robustFetchText(url); if(o&&o.ok&&o.text)return o; lastErr=new Error(o&&o.error?o.error:'No content'); }
+    catch(err){ lastErr=err; }
+    const backoff=BACKOFF_BASE_MS*Math.pow(2,i)+Math.floor(Math.random()*Math.min(500,BACKOFF_BASE_MS*Math.pow(2,i)));
+    await new Promise(r=>setTimeout(r,backoff));
   }
-  return { ok:false, error: lastErr ? String(lastErr) : 'fetch failed' };
+  return{ok:false,error:lastErr?String(lastErr):'fetch failed'};
 }
 
-/* KNMI Bonaire visibility extraction */
+/* ── KNMI VISIBILITY ── */
 function extractKnmiBonaireVisibility(text){
-  if(!text || !text.trim()) return null;
-  const s = String(text).replace(/\u00A0/g,' ').replace(/\s+/g,' ');
-  let m = s.match(/Visibility\s*\(?m?\)?[^0-9]{0,30}([0-9]{3,6})\b/i);
-  if (m && m[1]) return `${m[1]} m`;
-  m = s.match(/Visibiliteit\s*\(?m?\)?[^0-9]{0,30}([0-9]{3,6})\b/i);
-  if (m && m[1]) return `${m[1]} m`;
-  m = s.match(/Zicht(?:baarheid)?\s*\(?m?\)?[^0-9]{0,30}([0-9]{3,6})\b/i);
-  if (m && m[1]) return `${m[1]} m`;
-  m = s.match(/\b([0-9]{3,6})\s?(?:m|meter|meters)\b/i);
-  if (m && m[1]) return `${m[1]} m`;
-  const allNums = Array.from(s.matchAll(/\b([0-9]{4,6})\b/g)).map(a=>a[1]);
-  if (allNums.length){
-    allNums.sort((a,b)=> b.length - a.length || a.localeCompare(b));
-    return `${allNums[0]} m`;
-  }
+  if(!text||!text.trim())return null;
+  const s=String(text).replace(/\u00A0/g,' ').replace(/\s+/g,' ');
+  let m=s.match(/Visibility\s*\(?m?\)?[^0-9]{0,30}([0-9]{3,6})\b/i);if(m&&m[1])return`${m[1]} m`;
+  m=s.match(/Visibiliteit\s*\(?m?\)?[^0-9]{0,30}([0-9]{3,6})\b/i);if(m&&m[1])return`${m[1]} m`;
+  m=s.match(/Zicht(?:baarheid)?\s*\(?m?\)?[^0-9]{0,30}([0-9]{3,6})\b/i);if(m&&m[1])return`${m[1]} m`;
+  m=s.match(/\b([0-9]{3,6})\s?(?:m|meter|meters)\b/i);if(m&&m[1])return`${m[1]} m`;
+  const allNums=Array.from(s.matchAll(/\b([0-9]{4,6})\b/g)).map(a=>a[1]);
+  if(allNums.length){allNums.sort((a,b)=>b.length-a.length||a.localeCompare(b));return`${allNums[0]} m`;}
   return null;
 }
-
 async function updateVisFromKnmi(){
-  try {
-    const out = await fetchWithRetries(KNMI_BONAIRE_URL, MAX_RETRIES);
-    if (!out || !out.ok || !out.text) {
-      visValueEl.textContent = '—';
-      visStatusEl.classList.remove('low');
-      visTsEl.style.display = 'none';
-      return;
-    }
-    const text = String(out.text || '');
-    const rawVis = extractKnmiBonaireVisibility(text);
-    if (rawVis) {
-      visValueEl.textContent = rawVis;
-      const numeric = rawVis.match(/([0-9]{3,6})/);
-      if (numeric) {
-        const meters = parseInt(numeric[1].replace(/\D/g,''),10);
-        visStatusEl.classList.toggle('low', meters < 20000);
+  try{
+    const out=await fetchWithRetries(KNMI_BONAIRE_URL,MAX_RETRIES);
+    if(!out||!out.ok||!out.text){visValueEl.textContent='—';visStatusEl.classList.remove('low');visTsEl.style.display='none';return;}
+    const rawVis=extractKnmiBonaireVisibility(String(out.text||''));
+    if(rawVis){
+      const numMatch=rawVis.match(/([0-9]{3,6})/);
+      const meters=numMatch?parseInt(numMatch[1],10):NaN;
+      // Format nicely
+      if(!isNaN(meters)&&meters>=1000){
+        visValueEl.innerHTML=`<span style="font-size:2rem">${(meters/1000).toFixed(1)}</span><span class="vis-unit"> km</span>`;
       } else {
-        visStatusEl.classList.remove('low');
+        visValueEl.innerHTML=`<span style="font-size:1.7rem">${rawVis.replace(' m','')}</span><span class="vis-unit"> m</span>`;
       }
-      const local = formatLocalDateTimeParts();
-      if (visTsEl) { visTsEl.textContent = `Updated: ${local.date} ${local.time}`; visTsEl.style.display = 'block'; }
+      visStatusEl.classList.toggle('low',!isNaN(meters)&&meters<20000);
+      const local=formatLocalDateTimeParts();
+      if(visTsEl){visTsEl.textContent=`Updated ${local.date} ${local.time}`;visTsEl.style.display='block';}
     } else {
-      visValueEl.textContent = '—';
-      visStatusEl.classList.remove('low');
-      visTsEl.textContent = 'Visibility not found in KNMI response';
-      visTsEl.style.display = 'block';
+      visValueEl.textContent='—';visStatusEl.classList.remove('low');
+      if(visTsEl){visTsEl.textContent='Not found in response';visTsEl.style.display='block';}
     }
-  } catch (e) {
-    console.error('updateVisFromKnmi error', e);
-    visValueEl.textContent = '—';
-    visStatusEl.classList.remove('low');
-    visTsEl.style.display = 'none';
-  }
+  }catch(e){console.error('updateVisFromKnmi error',e);visValueEl.textContent='—';visStatusEl.classList.remove('low');visTsEl.style.display='none';}
 }
 
-/* Parsing helpers and METAR rendering (kept from original) */
-function cleanForParse(s){ if(!s) return ''; return String(s).replace(/\sRMK[\s\S]*/i,'').replace(/\s(?:TEMPO|BECMG|PROB\d{2}|FM\d{6})[\s\S]*/i,'').replace(/\bAUTO\b|\bCOR\b/gi,'').trim(); }
+/* ── METAR PARSING ── */
+function cleanForParse(s){if(!s)return'';return String(s).replace(/\sRMK[\s\S]*/i,'').replace(/\s(?:TEMPO|BECMG|PROB\d{2}|FM\d{6})[\s\S]*/i,'').replace(/\bAUTO\b|\bCOR\b/gi,'').trim();}
 function parseMetar(raw){
-  const cleaned = cleanForParse(raw);
-  const tokens = cleaned.split(/\s+/);
-  const time = tokens[1] || '--';
-  const windBase = tokens.find(x=>/^(?:VRB|\d{3})\d{2}(?:G\d{2,3})?KT$/.test(x)) || '/////KT';
-  const varDir = tokens.find(x=>/^\d{3}V\d{3}$/.test(x));
-  const wind = varDir ? `${windBase} ${varDir}` : windBase;
-  const visTokens = tokens.filter(x=>/^\d{4}(?:[NSEW]{1,2})?$/.test(x));
-  const vis = visTokens.length ? visTokens.join(' ') : '--';
-  const visMin = visTokens.length ? Math.min(...visTokens.map(v=>parseInt(v,10)).filter(n=>!isNaN(n))) : NaN;
-  const wx = tokens.filter(x=>/^(?:\+|-)?(?:VC)?(?:TS|VCTS|VCSH|TSRA|VCTS|VCSH|SH|SHRA|RA|DZ|SN|FG|BR|HZ|SQ|PO)/.test(x)).join(' ') || '--';
-  const cldMatch = cleaned.match(/((?:FEW|SCT|BKN|OVC)(?:\d{3}|\/{3})(?:TCU|CB)?)/gi) || [];
-  const cld = cldMatch.join(' ') || '--';
-  const td = tokens.find(x=>/^M?\d{2}\/M?\d{2}$/.test(x)) || '--';
-  const qp = tokens.find(x=>/^Q\d{4}$/.test(x)) || null;
-  let qnh = '—';
-  if(qp){
-    const h = qp.slice(1);
-    const inches = (parseInt(h,10) * 0.029529983071445).toFixed(2);
-    qnh = `${h} - ${inches}`;
-  }
-  const gust = +(windBase.match(/G(\d{2,3})/)?.[1] || 0);
-  let age = 0;
+  const cleaned=cleanForParse(raw),tokens=cleaned.split(/\s+/);
+  const time=tokens[1]||'--';
+  const windBase=tokens.find(x=>/^(?:VRB|\d{3})\d{2}(?:G\d{2,3})?KT$/.test(x))||'/////KT';
+  const varDir=tokens.find(x=>/^\d{3}V\d{3}$/.test(x));
+  const wind=varDir?`${windBase} ${varDir}`:windBase;
+  const visTokens=tokens.filter(x=>/^\d{4}(?:[NSEW]{1,2})?$/.test(x));
+  const vis=visTokens.length?visTokens.join(' '):'--';
+  const visMin=visTokens.length?Math.min(...visTokens.map(v=>parseInt(v,10)).filter(n=>!isNaN(n))):NaN;
+  const wx=tokens.filter(x=>/^(?:\+|-)?(?:VC)?(?:TS|VCTS|VCSH|TSRA|VCTS|VCSH|SH|SHRA|RA|DZ|SN|FG|BR|HZ|SQ|PO)/.test(x)).join(' ')||'--';
+  const cldMatch=cleaned.match(/((?:FEW|SCT|BKN|OVC)(?:\d{3}|\/{3})(?:TCU|CB)?)/gi)||[];
+  const cld=cldMatch.join(' ')||'--';
+  const td=tokens.find(x=>/^M?\d{2}\/M?\d{2}$/.test(x))||'--';
+  const qp=tokens.find(x=>/^Q\d{4}$/.test(x))||null;
+  let qnh='—';
+  if(qp){const h=qp.slice(1);const inches=(parseInt(h,10)*0.029529983071445).toFixed(2);qnh=`${h} / ${inches}`;}
+  const gust=+(windBase.match(/G(\d{2,3})/)?.[1]||0);
+  let age=0;
   if(/^\d{6}Z$/.test(time)){
-    const now=new Date();
-    const dd=parseInt(time.slice(0,2),10);
-    const hh=parseInt(time.slice(2,4),10);
-    const mm=parseInt(time.slice(4,6),10);
-    const tokenUtc = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), dd, hh, mm);
-    age = (Date.now() - tokenUtc) / 60000;
+    const now=new Date(),dd=parseInt(time.slice(0,2),10),hh=parseInt(time.slice(2,4),10),mm=parseInt(time.slice(4,6),10);
+    const tokenUtc=Date.UTC(now.getUTCFullYear(),now.getUTCMonth(),dd,hh,mm);
+    age=(Date.now()-tokenUtc)/60000;
   }
-  return { time, wind, windBase, vis, visTokens, visMin, wx, cld, td, qnh, gust, age, raw: cleaned };
+  return{time,wind,windBase,vis,visTokens,visMin,wx,cld,td,qnh,gust,age,raw:cleaned};
 }
-
-function setWxCritical(cell, wxText){
-  if(!cell) return false;
-  const txt = String(wxText || '');
-  const hasTS = /\b(?:VCTS|VCSH|TS|TSRA)\b/i.test(txt);
-  const hasSHRA = /\bSHRA\b/i.test(txt);
-  const hasSevere = /(^|\s)(?:\+|-)\s*(?:SHRA|SH|RA|DZ|SN|FG|BR|HZ)/i.test(txt);
-  const hasVCwithSH = /\bVC(?:SH|TS)\b/i.test(txt);
-  const critical = hasTS || hasVCwithSH || hasSevere || hasSHRA;
-  if(critical) cell.classList.add('wx-critical'); else cell.classList.remove('wx-critical');
+function setWxCritical(cell,wxText){
+  if(!cell)return false;
+  const txt=String(wxText||'');
+  const hasTS=/\b(?:VCTS|VCSH|TS|TSRA)\b/i.test(txt);
+  const hasSHRA=/\bSHRA\b/i.test(txt);
+  const hasSevere=/(^|\s)(?:\+|-)\s*(?:SHRA|SH|RA|DZ|SN|FG|BR|HZ)/i.test(txt);
+  const hasVCwithSH=/\bVC(?:SH|TS)\b/i.test(txt);
+  const critical=hasTS||hasVCwithSH||hasSevere||hasSHRA;
+  if(critical)cell.classList.add('wx-critical');else cell.classList.remove('wx-critical');
   return critical;
 }
+function isCloudGroupWithCbTcu(s){if(!s)return false;return/(?:FEW|SCT|BKN|OVC)\d{3}(?:CB|TCU)/i.test(s);}
 
-function isCloudGroupWithCbTcu(cloudString){
-  if(!cloudString) return false;
-  return /(?:FEW|SCT|BKN|OVC)\d{3}(?:CB|TCU)/i.test(cloudString);
-}
-
-/* Build METAR table */
+/* ── BUILD METAR TABLE ── */
 function buildMetarTable(){
-  metarTbody.innerHTML = '';
-  STATIONS.forEach(icao => {
-    metarState[icao] = metarState[icao] || { lastTime:null, lastRaw:null, pastRaw:null, row:null, rawEl:null, pastEl:null, highlightTimeout:null, stats:{winds:[],temps:[],vis:[],wxSummary:''} };
-    const tr = document.createElement('tr');
-    const rr = document.createElement('tr');
-    rr.className = 'raw';
-    tr.innerHTML = `<td class="station">${icao}</td><td class="time">--</td><td class="wind">--</td><td>--</td><td>--</td><td class="clouds">--</td><td>--</td><td>--</td>`;
-    rr.innerHTML = `<td colspan="8"><span class="raw-current"></span><span class="raw-past" style="display:block;margin-top:8px;color:var(--text);font-size:15px;font-weight:700"></span></td>`;
+  metarTbody.innerHTML='';
+  STATIONS.forEach(icao=>{
+    metarState[icao]=metarState[icao]||{lastTime:null,lastRaw:null,pastRaw:null,row:null,rawEl:null,pastEl:null,highlightTimeout:null,stats:{winds:[],temps:[],vis:[],wxSummary:''}};
+    const tr=document.createElement('tr');
+    const rr=document.createElement('tr');
+    rr.className='raw';
+    tr.innerHTML=`<td class="station">${icao}</td><td class="time">--</td><td class="wind">--</td><td>--</td><td class="wx">--</td><td class="clouds">--</td><td>--</td><td>--</td>`;
+    rr.innerHTML=`<td colspan="8"><span class="raw-current"></span><span class="raw-past"></span></td>`;
     metarTbody.appendChild(tr);
     metarTbody.appendChild(rr);
-    metarState[icao].row = tr;
-    metarState[icao].rawEl = rr.querySelector('.raw-current');
-    metarState[icao].pastEl = rr.querySelector('.raw-past');
+    metarState[icao].row=tr;
+    metarState[icao].rawEl=rr.querySelector('.raw-current');
+    metarState[icao].pastEl=rr.querySelector('.raw-past');
   });
 }
 buildMetarTable();
 
 function markTimeUpdated(icao){
-  const state = metarState[icao];
-  if(!state || !state.row) return;
-  const timeCell = state.row.querySelector('td.time');
-  if(!timeCell) return;
-  if (state.highlightTimeout) { clearTimeout(state.highlightTimeout); state.highlightTimeout = null; }
-  timeCell.classList.add('time-updated');
-  timeCell.classList.remove('dim');
-  state.highlightTimeout = setTimeout(() => {
+  const state=metarState[icao];
+  if(!state||!state.row)return;
+  const timeCell=state.row.querySelector('td.time');
+  if(!timeCell)return;
+  if(state.highlightTimeout){clearTimeout(state.highlightTimeout);state.highlightTimeout=null;}
+  timeCell.classList.add('time-updated');timeCell.classList.remove('dim');
+  state.highlightTimeout=setTimeout(()=>{
     timeCell.classList.add('dim');
-    setTimeout(() => { timeCell.classList.remove('time-updated'); timeCell.classList.remove('dim'); state.highlightTimeout = null; }, 700);
-  }, 5 * 60 * 1000);
+    setTimeout(()=>{timeCell.classList.remove('time-updated');timeCell.classList.remove('dim');state.highlightTimeout=null;},700);
+  },5*60*1000);
 }
-
 function extractWindSpeedFromWindBase(windBase){
-  if(!windBase || typeof windBase !== 'string') return 0;
-  const m = windBase.match(/^(?:VRB|(\d{3}))(\d{2,3})(?:G(\d{2,3}))?KT$/i);
-  if(!m) return 0;
-  const speed = parseInt(m[2],10);
-  return isNaN(speed) ? 0 : speed;
+  if(!windBase||typeof windBase!=='string')return 0;
+  const m=windBase.match(/^(?:VRB|(\d{3}))(\d{2,3})(?:G(\d{2,3}))?KT$/i);
+  if(!m)return 0;
+  const speed=parseInt(m[2],10);
+  return isNaN(speed)?0:speed;
 }
 
-function renderMetar(icao, raw){
+function renderMetar(icao,raw){
   try{
-    if(!raw) return false;
-    const lines = String(raw).split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
-    let metarLine = null;
-    for (const ln of lines){
-      if (ln.startsWith(icao) || /\b\d{6}Z\b/.test(ln) || /^[A-Z]{4}\s+\d{6}Z/.test(ln)){
-        metarLine = ln; break;
-      }
+    if(!raw)return false;
+    const lines=String(raw).split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
+    let metarLine=null;
+    for(const ln of lines){if(ln.startsWith(icao)||/\b\d{6}Z\b/.test(ln)||/^[A-Z]{4}\s+\d{6}Z/.test(ln)){metarLine=ln;break;}}
+    if(!metarLine&&lines.length)metarLine=lines[lines.length-1];
+    if(!metarLine)return false;
+    const parsed=parseMetar(metarLine);
+    const state=metarState[icao];
+    if(!state||!state.row)return false;
+    const tds=state.row.querySelectorAll('td');
+    [2,3,4,5].forEach(i=>{tds[i].classList.remove('alert','cloud-critical','wx-critical');});
+    state.row.classList.toggle('stale',parsed.age>120);
+    if(state.lastRaw&&state.lastRaw!==metarLine)state.pastRaw=state.lastRaw;
+    state.lastRaw=metarLine;
+    const previousTime=state.lastTime;
+    state.lastTime=parsed.time;
+    const isNew=previousTime!==parsed.time;
+    let timeDisplay='--';
+    if(parsed.time&&typeof parsed.time==='string'){
+      const m6=parsed.time.match(/^(\d{2})(\d{2})(\d{2})Z$/),m4=parsed.time.match(/^(\d{2})(\d{2})Z$/);
+      if(m6)timeDisplay=`${m6[2]}:${m6[3]}Z`;
+      else if(m4)timeDisplay=`${m4[1]}:${m4[2]}Z`;
+      else timeDisplay=parsed.time;
     }
-    if (!metarLine && lines.length) metarLine = lines[lines.length - 1];
-    if (!metarLine) return false;
-    const parsed = parseMetar(metarLine);
-    const state = metarState[icao];
-    if(!state || !state.row) return false;
-    const tds = state.row.querySelectorAll('td');
-    [2,3,4,5].forEach(i=>{ tds[i].classList.remove('alert'); tds[i].classList.remove('cloud-critical'); tds[i].classList.remove('wx-critical'); });
-    state.row.classList.toggle('stale', parsed.age > 120);
-    if(state.lastRaw && state.lastRaw !== metarLine) state.pastRaw = state.lastRaw;
-    state.lastRaw = metarLine;
-    const previousTime = state.lastTime;
-    state.lastTime = parsed.time;
-    const isNew = previousTime !== parsed.time;
-    let timeDisplay = '--';
-    if(parsed.time && typeof parsed.time === 'string'){
-      const m6 = parsed.time.match(/^(\d{2})(\d{2})(\d{2})Z$/);
-      const m4 = parsed.time.match(/^(\d{2})(\d{2})Z$/);
-      if(m6) timeDisplay = `${m6[2]}:${m6[3]}Z`;
-      else if(m4) timeDisplay = `${m4[1]}:${m4[2]}Z`;
-      else timeDisplay = parsed.time;
-    }
-    tds[1].textContent = timeDisplay;
-    tds[2].textContent = parsed.wind;
-    tds[3].textContent = parsed.vis;
-    tds[4].textContent = parsed.wx;
-    tds[5].textContent = parsed.cld;
-    tds[6].textContent = parsed.td;
-    tds[7].textContent = parsed.qnh;
-    if(state.rawEl) state.rawEl.textContent = state.lastRaw || '';
+    tds[1].textContent=timeDisplay;
+    tds[2].textContent=parsed.wind;
+    tds[3].textContent=parsed.vis;
+    tds[4].textContent=parsed.wx;
+    tds[5].textContent=parsed.cld;
+    tds[6].textContent=parsed.td;
+    tds[7].textContent=parsed.qnh;
+    if(state.rawEl)state.rawEl.textContent=state.lastRaw||'';
     if(state.pastEl){
-      if(state.pastRaw){ state.pastEl.style.display = 'block'; state.pastEl.textContent = `Previous: ${state.pastRaw}`; } else { state.pastEl.style.display = 'none'; state.pastEl.textContent = ''; }
+      if(state.pastRaw){state.pastEl.style.display='block';state.pastEl.textContent=`Previous: ${state.pastRaw}`;}
+      else{state.pastEl.style.display='none';state.pastEl.textContent='';}
     }
-    const hasGustToken = /G\d{2,3}KT/i.test(parsed.windBase);
-    const gustValue = parsed.gust || 0;
-    const windSpeed = extractWindSpeedFromWindBase(parsed.windBase);
-    const windHasGust = hasGustToken || gustValue > 0;
-    const tsPresent = /\b(?:VCTS|VCSH|TS|TSRA)\b/i.test(parsed.wx);
-    const cloudFlag = isCloudGroupWithCbTcu(parsed.cld);
-    const wxCritical = setWxCritical(tds[4], parsed.wx);
-    if (isNew) {
-      playBeep();
-      markTimeUpdated(icao);
-    }
-    if (windHasGust && isNew) { tds[2].classList.add('alert'); }
-    if(!isNaN(parsed.visMin) && parsed.visMin <= 5000) tds[3].classList.add('alert');
-    if(wxCritical) tds[4].classList.add('alert');
-    if(cloudFlag) { tds[5].classList.add('cloud-critical'); }
-    const criticalForThisStation = (icao === 'TNCA' && gustValue >= 35);
-    const criticalGlobal = tsPresent;
-    if (isNew && (criticalForThisStation || criticalGlobal)) { playCriticalAlarm(); }
-    if (typeof windSpeed === 'number') { state.stats.winds.push(windSpeed); if (state.stats.winds.length > 200) state.stats.winds.shift(); }
-    if (parsed.td && typeof parsed.td === 'string') {
-      const m = parsed.td.match(/^(M?)(\d{1,2})\/(M?)(\d{1,2})$/);
-      if (m) {
-        const sign = m[1] === 'M' ? -1 : 1;
-        const tempVal = sign * parseInt(m[2],10);
-        state.stats.temps.push(tempVal);
-        if (state.stats.temps.length > 200) state.stats.temps.shift();
-      }
-    }
-    if (!isNaN(parsed.visMin)) { state.stats.vis.push(parsed.visMin); if (state.stats.vis.length > 200) state.stats.vis.shift(); }
+    const hasGustToken=/G\d{2,3}KT/i.test(parsed.windBase);
+    const gustValue=parsed.gust||0;
+    const windSpeed=extractWindSpeedFromWindBase(parsed.windBase);
+    const windHasGust=hasGustToken||gustValue>0;
+    const tsPresent=/\b(?:VCTS|VCSH|TS|TSRA)\b/i.test(parsed.wx);
+    const cloudFlag=isCloudGroupWithCbTcu(parsed.cld);
+    const wxCritical=setWxCritical(tds[4],parsed.wx);
+    if(isNew){playBeep();markTimeUpdated(icao);}
+    if(windHasGust&&isNew)tds[2].classList.add('alert');
+    if(!isNaN(parsed.visMin)&&parsed.visMin<=5000)tds[3].classList.add('alert');
+    if(wxCritical)tds[4].classList.add('alert');
+    if(cloudFlag)tds[5].classList.add('cloud-critical');
+    const criticalForThisStation=(icao==='TNCA'&&gustValue>=35);
+    const criticalGlobal=tsPresent;
+    if(isNew&&(criticalForThisStation||criticalGlobal))playCriticalAlarm();
+    if(typeof windSpeed==='number'){state.stats.winds.push(windSpeed);if(state.stats.winds.length>200)state.stats.winds.shift();}
+    if(parsed.td&&typeof parsed.td==='string'){const m=parsed.td.match(/^(M?)(\d{1,2})\/(M?)(\d{1,2})$/);if(m){const sign=m[1]==='M'?-1:1;const tempVal=sign*parseInt(m[2],10);state.stats.temps.push(tempVal);if(state.stats.temps.length>200)state.stats.temps.shift();}}
+    if(!isNaN(parsed.visMin)){state.stats.vis.push(parsed.visMin);if(state.stats.vis.length>200)state.stats.vis.shift();}
     return true;
-  }catch(e){ console.error('renderMetar error', icao, e); return false; }
+  }catch(e){console.error('renderMetar error',icao,e);return false;}
 }
 
-/* Fetch METAR for a station and render */
 async function fetchMetarFor(icao){
-  try {
-    const url = METAR_TEMPLATE.replace('{ICAO}', icao);
-    const out = await fetchWithRetries(url, MAX_RETRIES);
-    if (!out || !out.ok || !out.text) return false;
-    const txt = String(out.text).trim();
-    const lines = txt.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
-    for (let i = lines.length - 1; i >= 0; i--){
-      const ln = lines[i];
-      if (ln.startsWith(icao) || /\b\d{6}Z\b/.test(ln) || /^[A-Z]{4}\s+\d{6}Z/.test(ln)){
-        if ((icao === 'SVMI' || icao === 'SVVA') && /\bAUTO\b/i.test(ln)) continue;
-        renderMetar(icao, ln);
-        return true;
+  try{
+    const url=METAR_TEMPLATE.replace('{ICAO}',icao);
+    const out=await fetchWithRetries(url,MAX_RETRIES);
+    if(!out||!out.ok||!out.text)return false;
+    const txt=String(out.text).trim(),lines=txt.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
+    for(let i=lines.length-1;i>=0;i--){
+      const ln=lines[i];
+      if(ln.startsWith(icao)||/\b\d{6}Z\b/.test(ln)||/^[A-Z]{4}\s+\d{6}Z/.test(ln)){
+        if((icao==='SVMI'||icao==='SVVA')&&/\bAUTO\b/i.test(ln))continue;
+        renderMetar(icao,ln);return true;
       }
     }
     return false;
-  } catch (err) {
-    console.error('METAR fetch error for', icao, err);
-    return false;
-  }
+  }catch(err){console.error('METAR fetch error for',icao,err);return false;}
 }
 
-/* Refresh all METARs and update last-updated */
 async function refreshAllMetars(){
-  try {
-    const promises = STATIONS.map(s => fetchMetarFor(s));
-    const results = await Promise.all(promises);
-    const anyLoaded = results.some(Boolean);
-    const local = (function(){ const d=new Date(); return `${pad(d.getDate())}-${pad(d.getMonth()+1)}-${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}` })();
-    if (lastUpdatedEl) lastUpdatedEl.textContent = `METAR last updated: ${local}`;
-    return anyLoaded;
-  } catch (e) {
-    console.error('refreshAllMetars error', e);
-    return false;
-  }
+  try{
+    const results=await Promise.all(STATIONS.map(s=>fetchMetarFor(s)));
+    const local=formatLocalDateTimeParts();
+    if(lastUpdatedEl)lastUpdatedEl.textContent=`Last updated: ${local.date} ${local.time}`;
+    return results.some(Boolean);
+  }catch(e){console.error('refreshAllMetars error',e);return false;}
 }
 
-/* TAF & SYNOP helpers */
+/* ── TAF & SYNOP ── */
 function sanitizeTextForDisplay(text){
-  if(!text) return '';
-  const lines = String(text).split('\n').map(l=>l.trim()).filter(Boolean);
-  const keep = [];
+  if(!text)return'';
+  const lines=String(text).split('\n').map(l=>l.trim()).filter(Boolean);
+  const keep=[];
   for(const line of lines){
-    if (/^\s*URL\s*Source\s*:/i.test(line)) continue;
-    if (/^\s*Published\s*Time\s*:/i.test(line)) continue;
-    if (/^\s*Markdown\s*Content\s*:/i.test(line)) continue;
-    if (/^https?:\/\//i.test(line)) continue;
+    if(/^\s*URL\s*Source\s*:/i.test(line))continue;
+    if(/^\s*Published\s*Time\s*:/i.test(line))continue;
+    if(/^\s*Markdown\s*Content\s*:/i.test(line))continue;
+    if(/^https?:\/\//i.test(line))continue;
     keep.push(line);
   }
   return keep.join('\n');
 }
 
 function buildTafTable(){
-  tafTbody.innerHTML = '';
-  STATIONS.slice(0,3).forEach(icao => {
-    const tr = document.createElement('tr');
-    tr.dataset.icao = icao;
-    tr.innerHTML = `<td class="station">${icao}</td><td class="taf-raw"></td>`;
+  tafTbody.innerHTML='';
+  STATIONS.slice(0,3).forEach(icao=>{
+    const tr=document.createElement('tr');
+    tr.dataset.icao=icao;
+    tr.innerHTML=`<td class="station">${icao}</td><td><div class="taf-raw"></div></td>`;
     tafTbody.appendChild(tr);
   });
 }
 buildTafTable();
 
 async function loadTafRow(icao){
-  try {
-    const url = TAF_TEMPLATE.replace('{ICAO}', icao);
-    const out = await fetchWithRetries(url, MAX_RETRIES);
-    if (out && out.ok && out.text){
-      const row = tafTbody.querySelector(`tr[data-icao="${icao}"]`);
-      if (row) row.querySelector('.taf-raw').textContent = sanitizeTextForDisplay(out.text);
-      const local = formatLocalDateTimeParts();
-      if (tafUpdatedEl) tafUpdatedEl.textContent = `TAF last updated: ${local.date} ${local.time}`;
+  try{
+    const url=TAF_TEMPLATE.replace('{ICAO}',icao);
+    const out=await fetchWithRetries(url,MAX_RETRIES);
+    if(out&&out.ok&&out.text){
+      const row=tafTbody.querySelector(`tr[data-icao="${icao}"]`);
+      if(row)row.querySelector('.taf-raw').textContent=sanitizeTextForDisplay(out.text);
+      const local=formatLocalDateTimeParts();
+      if(tafUpdatedEl)tafUpdatedEl.textContent=`TAF last updated: ${local.date} ${local.time}`;
     }
-  } catch (e){ console.error('loadTafRow error', icao, e); }
+  }catch(e){console.error('loadTafRow error',icao,e);}
 }
+async function loadAllTafs(){await Promise.all(STATIONS.slice(0,3).map(i=>loadTafRow(i)));}
 
-async function loadAllTafs(){ const list = STATIONS.slice(0,3); await Promise.all(list.map(i => loadTafRow(i))); }
-
-function buildSynopTable(){ synopTbody.innerHTML = ''; const sources = ['TNCA SINU50','TNCA SMNU50','TNCC SI','TNCC SM']; sources.forEach((name, i) => { const tr = document.createElement('tr'); tr.dataset.idx = String(i); tr.innerHTML = `<td class="station">${name}</td><td class="synop-raw"></td>`; synopTbody.appendChild(tr); }); }
+function buildSynopTable(){
+  synopTbody.innerHTML='';
+  const sources=['TNCA SINU50','TNCA SMNU50','TNCC SI','TNCC SM'];
+  sources.forEach((name,i)=>{
+    const tr=document.createElement('tr');
+    tr.dataset.idx=String(i);
+    tr.innerHTML=`<td class="station">${name}</td><td><div class="synop-raw"></div></td>`;
+    synopTbody.appendChild(tr);
+  });
+}
 buildSynopTable();
 
-async function loadSynopRow(index, url){
-  try {
-    const out = await fetchWithRetries(url, MAX_RETRIES);
-    if (out && out.ok && out.text){
-      const row = synopTbody.querySelector(`tr[data-idx="${index}"]`);
-      if (row) row.querySelector('.synop-raw').textContent = sanitizeTextForDisplay(out.text);
-      const local = formatLocalDateTimeParts();
-      if (synopUpdatedEl) synopUpdatedEl.textContent = `SYNOP last updated: ${local.date} ${local.time}`;
+async function loadSynopRow(index,url){
+  try{
+    const out=await fetchWithRetries(url,MAX_RETRIES);
+    if(out&&out.ok&&out.text){
+      const row=synopTbody.querySelector(`tr[data-idx="${index}"]`);
+      if(row)row.querySelector('.synop-raw').textContent=sanitizeTextForDisplay(out.text);
+      const local=formatLocalDateTimeParts();
+      if(synopUpdatedEl)synopUpdatedEl.textContent=`SYNOP last updated: ${local.date} ${local.time}`;
     }
-  } catch (e){ console.error('loadSynopRow error', index, e); }
+  }catch(e){console.error('loadSynopRow error',index,e);}
 }
-
 async function loadAllSynops(){
-  const SYNOP_URLS = [
+  const SYNOP_URLS=[
     'https://tgftp.nws.noaa.gov/data/raw/si/sinu50.tnca..txt',
     'https://tgftp.nws.noaa.gov/data/raw/sm/smnu50.tnca..txt',
     'https://tgftp.nws.noaa.gov/data/raw/si/sica20.tncc..txt',
     'https://tgftp.nws.noaa.gov/data/raw/sm/smca01.tncc..txt'
   ];
-  const promises = SYNOP_URLS.map((u, i) => loadSynopRow(i, u));
-  await Promise.all(promises);
+  await Promise.all(SYNOP_URLS.map((u,i)=>loadSynopRow(i,u)));
 }
 
-/* Test mode runner */
-let testInterval = null;
-const TEST_SAMPLES = [
-  {
-    'TNCA':'TNCA 152000Z 35035G50KT 9999 VCSH FEW013CB 28/23 Q1011 NOSIG',
-    'TNCB':'TNCB 152000Z 34020G35KT 0400 +TSRA FEW020CB BKN030 26/24 Q0980',
-    'TNCC':'TNCC 152000Z 12045G60KT 0500 +TSRA FEW016TCU OVC025 27/25 Q1000',
-    'TNCM':'TNCM 152000Z 20015G35KT 0800 SHRA FEW020TCU BKN018 25/23 Q0995',
-    'SVMI':'SVMI 152000Z 30025G45KT 9999 VCSH FEW020CB BKN030 28/26 Q1002',
-    'SVVA':'SVVA 152000Z 04010G20KT 0300 -SHRA FEW020 BKN025 22/21 Q1008'
-  },
-  {
-    'TNCA':'TNCA 152010Z 35020G40KT 0400 +TSRA FEW020CB BKN030 26/24 Q0980',
-    'TNCB':'TNCB 152010Z 09012G30KT 0500 -DZ SCT020 BKN040 24/22 Q1010',
-    'TNCC':'TNCC 152010Z 12045G60KT 0500 VCTS FEW020CB OVC025 27/25 Q1000',
-    'TNCM':'TNCM 152010Z 20015G35KT 0800 SHRA FEW020TCU BKN018 25/23 Q0995',
-    'SVMI':'SVMI 152010Z 30025G45KT 9999 VCTS FEW020CB BKN030 28/26 Q1002',
-    'SVVA':'SVVA 152010Z 04010G20KT 0300 -SHRA FEW020 BKN025 22/21 Q1008'
-  },
-  {
-    'TNCA':'TNCA 152020Z 12010KT 9999 FEW020 SCT040 28/24 Q1013',
-    'TNCB':'TNCB 152020Z 08008KT 9999 FEW025 SCT050 26/22 Q1015',
-    'TNCC':'TNCC 152020Z 14012KT 9999 SCT030 BKN050 27/25 Q1008',
-    'TNCM':'TNCM 152020Z 18012KT 9999 FEW020 SCT040 26/24 Q1005',
-    'SVMI':'SVMI 152020Z 20015KT 9999 FEW020 SCT030 29/27 Q1009',
-    'SVVA':'SVVA 152020Z 06008KT 9999 FEW020 SCT040 24/22 Q1010'
-  }
+/* ── TEST MODE ── */
+let testInterval=null;
+const TEST_SAMPLES=[
+  {'TNCA':'TNCA 152000Z 35035G50KT 9999 VCSH FEW013CB 28/23 Q1011 NOSIG','TNCB':'TNCB 152000Z 34020G35KT 0400 +TSRA FEW020CB BKN030 26/24 Q0980','TNCC':'TNCC 152000Z 12045G60KT 0500 +TSRA FEW016TCU OVC025 27/25 Q1000','TNCM':'TNCM 152000Z 20015G35KT 0800 SHRA FEW020TCU BKN018 25/23 Q0995','SVMI':'SVMI 152000Z 30025G45KT 9999 VCSH FEW020CB BKN030 28/26 Q1002','SVVA':'SVVA 152000Z 04010G20KT 0300 -SHRA FEW020 BKN025 22/21 Q1008'},
+  {'TNCA':'TNCA 152010Z 35020G40KT 0400 +TSRA FEW020CB BKN030 26/24 Q0980','TNCB':'TNCB 152010Z 09012G30KT 0500 -DZ SCT020 BKN040 24/22 Q1010','TNCC':'TNCC 152010Z 12045G60KT 0500 VCTS FEW020CB OVC025 27/25 Q1000','TNCM':'TNCM 152010Z 20015G35KT 0800 SHRA FEW020TCU BKN018 25/23 Q0995','SVMI':'SVMI 152010Z 30025G45KT 9999 VCTS FEW020CB BKN030 28/26 Q1002','SVVA':'SVVA 152010Z 04010G20KT 0300 -SHRA FEW020 BKN025 22/21 Q1008'},
+  {'TNCA':'TNCA 152020Z 12010KT 9999 FEW020 SCT040 28/24 Q1013','TNCB':'TNCB 152020Z 08008KT 9999 FEW025 SCT050 26/22 Q1015','TNCC':'TNCC 152020Z 14012KT 9999 SCT030 BKN050 27/25 Q1008','TNCM':'TNCM 152020Z 18012KT 9999 FEW020 SCT040 26/24 Q1005','SVMI':'SVMI 152020Z 20015KT 9999 FEW020 SCT030 29/27 Q1009','SVVA':'SVVA 152020Z 06008KT 9999 FEW020 SCT040 24/22 Q1010'}
 ];
-
 function applyTestSamples(sample){
-  STATIONS.forEach(icao => {
-    const raw = sample[icao] || `${icao} 151206Z 09010KT 9999 FEW020 28/24 Q1013`;
-    renderMetar(icao, raw);
-  });
-  const local = formatLocalDateTimeParts();
-  if (lastUpdatedEl) lastUpdatedEl.textContent = `METAR test data applied: ${local.date} ${local.time}`;
+  STATIONS.forEach(icao=>{const raw=sample[icao]||`${icao} 151206Z 09010KT 9999 FEW020 28/24 Q1013`;renderMetar(icao,raw);});
+  const local=formatLocalDateTimeParts();
+  if(lastUpdatedEl)lastUpdatedEl.textContent=`Test data applied: ${local.date} ${local.time}`;
 }
-
 function startTestRunner(){
-  if(testInterval) clearInterval(testInterval);
-  let idx = 0;
-  applyTestSamples(TEST_SAMPLES[idx]);
-  testInterval = setInterval(()=>{ idx = (idx + 1) % TEST_SAMPLES.length; applyTestSamples(TEST_SAMPLES[idx]); }, 4000);
+  if(testInterval)clearInterval(testInterval);
+  let idx=0;applyTestSamples(TEST_SAMPLES[idx]);
+  testInterval=setInterval(()=>{idx=(idx+1)%TEST_SAMPLES.length;applyTestSamples(TEST_SAMPLES[idx]);},4000);
 }
-function stopTestRunner(){ if(testInterval){ clearInterval(testInterval); testInterval = null; } }
+function stopTestRunner(){if(testInterval){clearInterval(testInterval);testInterval=null;}}
 
-/* Wiring events (METAR UI) */
-document.getElementById('metar-refresh-btn')?.addEventListener('click', () => refreshAllMetars());
-document.getElementById('refresh-btn')?.addEventListener('click', () => { updateVisFromKnmi(); refreshAllMetars(); });
-document.getElementById('taf-refresh-btn')?.addEventListener('click', async () => { const btn = document.getElementById('taf-refresh-btn'); btn.disabled = true; try { await loadAllTafs(); } catch(e){} setTimeout(()=>btn.disabled = false, 800); });
-document.getElementById('synop-refresh-btn')?.addEventListener('click', async () => { const btn = document.getElementById('synop-refresh-btn'); btn.disabled = true; try { await loadAllSynops(); } catch(e){} setTimeout(()=>btn.disabled = false, 800); });
-document.getElementById('vis-refresh-btn')?.addEventListener('click', async () => { const btn = document.getElementById('vis-refresh-btn'); btn.disabled = true; try { await updateVisFromKnmi(); } catch(e){} setTimeout(()=>btn.disabled = false, 800); });
-document.getElementById('mute-btn')?.addEventListener('click', () => { const b = document.getElementById('mute-btn'); mute = !mute; b.setAttribute('aria-pressed', String(mute)); b.textContent = mute ? 'Unmute Beep' : 'Mute Beep'; });
-document.getElementById('test-btn')?.addEventListener('click', () => { testMode = !testMode; const b = document.getElementById('test-btn'); if (b) b.textContent = testMode ? 'Exit Test Mode' : 'Enter Test Mode'; if (testMode) startTestRunner(); else stopTestRunner(); });
+/* ── EVENTS ── */
+document.getElementById('metar-refresh-btn')?.addEventListener('click',()=>refreshAllMetars());
+document.getElementById('refresh-btn')?.addEventListener('click',()=>{updateVisFromKnmi();refreshAllMetars();});
+document.getElementById('taf-refresh-btn')?.addEventListener('click',async()=>{const btn=document.getElementById('taf-refresh-btn');btn.disabled=true;try{await loadAllTafs();}catch(e){}setTimeout(()=>btn.disabled=false,800);});
+document.getElementById('synop-refresh-btn')?.addEventListener('click',async()=>{const btn=document.getElementById('synop-refresh-btn');btn.disabled=true;try{await loadAllSynops();}catch(e){}setTimeout(()=>btn.disabled=false,800);});
+document.getElementById('vis-refresh-btn')?.addEventListener('click',async()=>{const btn=document.getElementById('vis-refresh-btn');btn.disabled=true;try{await updateVisFromKnmi();}catch(e){}setTimeout(()=>btn.disabled=false,800);});
+document.getElementById('mute-btn')?.addEventListener('click',()=>{const b=document.getElementById('mute-btn');mute=!mute;b.setAttribute('aria-pressed',String(mute));b.textContent=mute?'🔇 Unmute':'🔊 Mute';});
+document.getElementById('test-btn')?.addEventListener('click',()=>{testMode=!testMode;const b=document.getElementById('test-btn');if(b)b.textContent=testMode?'⚗ Exit Test':'⚗ Test Mode';if(testMode)startTestRunner();else stopTestRunner();});
 
-/* Copy-to-clipboard for METAR table cells */
-document.getElementById('metar')?.addEventListener('click', async e => {
-  const td = e.target.closest('td');
-  if(!td) return;
-  const tr = td.closest('tr');
-  if(!tr) return;
-  if (tr.classList && tr.classList.contains('raw')) return;
-  const text = td.textContent.trim();
-  if (!text) return;
-  try {
+/* Copy on click */
+document.getElementById('metar')?.addEventListener('click',async e=>{
+  const td=e.target.closest('td');
+  if(!td)return;
+  const tr=td.closest('tr');
+  if(!tr||tr.classList.contains('raw'))return;
+  const text=td.textContent.trim();
+  if(!text)return;
+  try{
     await navigator.clipboard.writeText(text);
-    td.classList.add('flash-blue');
-    setTimeout(()=>td.classList.remove('flash-blue'),600);
-    const sel = window.getSelection && window.getSelection();
-    if(sel && sel.removeAllRanges) sel.removeAllRanges();
-  } catch (err) {
-    try {
-      const ta = document.createElement('textarea');
-      ta.value = text;
-      ta.style.position = 'fixed';
-      ta.style.left = '-9999px';
-      document.body.appendChild(ta);
-      ta.select();
-      document.execCommand('copy');
-      document.body.removeChild(ta);
-      td.classList.add('flash-blue');
-      setTimeout(()=>td.classList.remove('flash-blue'),600);
-    } catch (e) {
-      console.warn('copy failed', e);
-    }
+    td.classList.add('flash-blue');setTimeout(()=>td.classList.remove('flash-blue'),600);
+  }catch(err){
+    try{
+      const ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.left='-9999px';document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);
+      td.classList.add('flash-blue');setTimeout(()=>td.classList.remove('flash-blue'),600);
+    }catch(e){console.warn('copy failed',e);}
   }
 });
 
-/* Intervals & init */
-setInterval(()=>{ if(!testMode) refreshAllMetars(); }, METAR_REFRESH_MS);
-setInterval(()=>{ if(!testMode) updateVisFromKnmi(); }, VIS_REFRESH_MS);
+/* ── INTERVALS ── */
+setInterval(()=>{if(!testMode)refreshAllMetars();},METAR_REFRESH_MS);
+setInterval(()=>{if(!testMode)updateVisFromKnmi();},VIS_REFRESH_MS);
 
-/* ---------- Stations dashboard code (integrated) ---------- */
-
-/* Stations dashboard config */
-const API_BASE = 'https://curacao-weather-api.generast.workers.dev/'; // placeholder API for stations
-const COORDS = {
-  "Curaçao International Airport": { lat: 12.18889, lon: -68.95972 },
-  "Curacao International Airport": { lat: 12.18889, lon: -68.95972 },
-  "Seru Mahuma": { lat: 12.18330, lon: -68.93330 },
-  "Santa Maria": { lat: 12.16720, lon: -68.93920 },
-  "Savonet": { lat: 12.35060, lon: -69.10610 },
-  "Soto": { lat: 12.26670, lon: -69.10000 },
-  "Seinpost": { lat: 12.10000, lon: -68.85000 },
-  "Sun Valley": { lat: 12.12000, lon: -68.95000 },
-  "Seru Kokori": { lat: 12.20000, lon: -68.95000 },
-  "Spaanse Water": { lat: 12.06730, lon: -68.85010 },
-  "Steenrijk": { lat: 12.09788, lon: -68.91214 }
+/* ════════════════════════════════════════
+   STATIONS DASHBOARD
+════════════════════════════════════════ */
+const API_BASE='https://curacao-weather-api.generast.workers.dev/';
+const COORDS={
+  "Curaçao International Airport":{lat:12.18889,lon:-68.95972},
+  "Curacao International Airport":{lat:12.18889,lon:-68.95972},
+  "Seru Mahuma":{lat:12.18330,lon:-68.93330},
+  "Santa Maria":{lat:12.16720,lon:-68.93920},
+  "Savonet":{lat:12.35060,lon:-69.10610},
+  "Soto":{lat:12.26670,lon:-69.10000},
+  "Seinpost":{lat:12.10000,lon:-68.85000},
+  "Sun Valley":{lat:12.12000,lon:-68.95000},
+  "Seru Kokori":{lat:12.20000,lon:-68.95000},
+  "Spaanse Water":{lat:12.06730,lon:-68.85010},
+  "Steenrijk":{lat:12.09788,lon:-68.91214}
 };
-const MAP_EXCLUDE = new Set(['Klein Kwartier', 'Punda']);
-const ISLAND_CENTER = { lat: 12.16957, lon: -68.99002 };
-const ISLAND_BOUNDS = [[11.9177, -69.5311], [12.5478, -68.3707]];
+const MAP_EXCLUDE=new Set(['Klein Kwartier','Punda']);
+const ISLAND_CENTER={lat:12.16957,lon:-68.99002};
+const ISLAND_BOUNDS=[[11.9177,-69.5311],[12.5478,-68.3707]];
+let currentData=[],map=null,markersLayer=null;
 
-let currentData = [];
-let map = null;
-let markersLayer = null;
+const el=id=>document.getElementById(id);
+function safeNum(v){return(v===null||v===undefined||v==='')?null:Number(v);}
+function escapeHtml(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function parseIso(s){if(!s)return null;const d=new Date(s);return isNaN(d)?null:d;}
+function sameLocalDate(a,b){if(!a||!b)return false;return a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate();}
 
-/* Helpers for stations */
-const el = id => document.getElementById(id);
-function safeNum(v){ return (v === null || v === undefined || v === '') ? null : Number(v); }
-function escapeHtml(s){ return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-function parseIso(s){ if(!s) return null; const d = new Date(s); return isNaN(d) ? null : d; }
-function sameLocalDate(a,b){ if(!a||!b) return false; return a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate(); }
-
-/* Evaluate severity (simple date-only stale rule) */
 function evaluateStation(row){
-  const now = new Date();
-  const last = parseIso(row.last_updated_iso || row.last_updated);
-  const isStaleDate = !last || !sameLocalDate(now, last);
-  const severity = isStaleDate ? 3 : 0;
-  return { alerts: [], severity, isStaleDate };
+  const now=new Date(),last=parseIso(row.last_updated_iso||row.last_updated);
+  const isStaleDate=!last||!sameLocalDate(now,last);
+  return{alerts:[],severity:isStaleDate?3:0,isStaleDate};
 }
 
-/* Wind rose SVG generator */
-function windRoseSvg(directionDeg, speed){
-  const dir = (typeof directionDeg === 'number' && isFinite(directionDeg)) ? directionDeg : null;
-  const sp = (typeof speed === 'number' && isFinite(speed)) ? speed : null;
-  const maxLen = 28;
-  const len = sp ? Math.min(maxLen, Math.max(6, (sp / 20) * maxLen)) : 12;
-  const arrowColor = sp >= 25 ? '#ef4444' : (sp >= 15 ? '#f59e0b' : '#16a34a');
-  if (dir === null) {
-    return `<div class="wind-rose" aria-hidden="true"><svg viewBox="0 0 84 84"><circle cx="42" cy="42" r="30" stroke="#2b4f66" stroke-width="2" fill="none" stroke-dasharray="3 4"/><text x="42" y="46" fill="#e6f6ff" font-size="12" text-anchor="middle">—</text></svg></div>`;
-  }
-  const toDeg = (dir + 180) % 360;
-  return `<div class="wind-rose" aria-hidden="true"><svg viewBox="0 0 84 84"><defs><marker id="arrowhead" markerWidth="6" markerHeight="6" refX="0" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 z" fill="${arrowColor}"/></marker></defs><circle cx="42" cy="42" r="30" stroke="#2b4f66" stroke-width="2" fill="none"/><g transform="translate(42,42) rotate(${toDeg})"><line x1="0" y1="0" x2="0" y2="${-len}" stroke="${arrowColor}" stroke-width="3" stroke-linecap="round" marker-end="url(#arrowhead)"/><circle cx="0" cy="0" r="3" fill="${arrowColor}" /></g><text x="42" y="74" fill="#e6f6ff" font-size="12" text-anchor="middle">${sp !== null ? Math.round(sp) + ' kn' : '—'}</text></svg></div>`;
+function windRoseSvg(directionDeg,speed){
+  const dir=(typeof directionDeg==='number'&&isFinite(directionDeg))?directionDeg:null;
+  const sp=(typeof speed==='number'&&isFinite(speed))?speed:null;
+  if(dir===null){return`<svg viewBox="0 0 84 84" class="wind-rose"><circle cx="42" cy="42" r="30" stroke="rgba(85,193,255,0.15)" stroke-width="1.5" fill="none"/><text x="42" y="47" fill="rgba(106,138,170,0.6)" font-size="13" text-anchor="middle" font-family="Space Mono,monospace">—</text></svg>`;}
+  const maxLen=27,len=sp?Math.min(maxLen,Math.max(6,(sp/20)*maxLen)):10;
+  const arrowColor=sp>=25?'#ff5f5f':(sp>=15?'#f59e0b':'#3fcf82');
+  const toDeg=(dir+180)%360;
+  return`<svg viewBox="0 0 84 84" class="wind-rose">
+    <defs><marker id="arr${Math.floor(Math.random()*9999)}" markerWidth="6" markerHeight="6" refX="0" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 z" fill="${arrowColor}"/></marker></defs>
+    <circle cx="42" cy="42" r="30" stroke="rgba(85,193,255,0.15)" stroke-width="1.5" fill="none"/>
+    <circle cx="42" cy="42" r="2" stroke="rgba(85,193,255,0.2)" stroke-width="1" fill="none"/>
+    <g transform="translate(42,42) rotate(${toDeg})">
+      <line x1="0" y1="0" x2="0" y2="${-len}" stroke="${arrowColor}" stroke-width="2.5" stroke-linecap="round"/>
+      <polygon points="0,${-(len+7)} -4,${-(len)} 4,${-(len)}" fill="${arrowColor}"/>
+      <circle cx="0" cy="0" r="3" fill="${arrowColor}" fill-opacity="0.7"/>
+    </g>
+    <text x="42" y="75" fill="rgba(200,230,255,0.7)" font-size="11" text-anchor="middle" font-family="Space Mono,monospace">${sp!==null?Math.round(sp)+' kn':'—'}</text>
+  </svg>`;
 }
 
-/* Extract coords from station row or fallback */
 function extractCoords(row){
-  const keys = ['latitude','lat','lat_deg','lat_d','lat_dd','longitude','lon','lon_deg','lon_d','lon_dd','lng'];
-  let lat = null, lon = null;
-  for (const k of keys){
-    if (k in row && row[k] != null){
-      if (k.startsWith('lat') || k === 'latitude') lat = row[k];
-      if (k.startsWith('lon') || k === 'longitude' || k === 'lng') lon = row[k];
-    }
+  let lat=null,lon=null;
+  const latKeys=['latitude','lat','lat_deg','lat_d','lat_dd'],lonKeys=['longitude','lon','lon_deg','lon_d','lon_dd','lng'];
+  for(const k of latKeys){if(k in row&&row[k]!=null){lat=row[k];break;}}
+  for(const k of lonKeys){if(k in row&&row[k]!=null){lon=row[k];break;}}
+  if(lat==null&&row.location&&row.location.lat)lat=row.location.lat;
+  if(lon==null&&row.location&&row.location.lon)lon=row.location.lon;
+  lat=lat!=null?Number(lat):null;lon=lon!=null?Number(lon):null;
+  if(!isFinite(lat))lat=null;if(!isFinite(lon))lon=null;
+  const name=(row.station||'').trim();
+  if((lat==null||lon==null)&&name){
+    if(COORDS[name]){lat=COORDS[name].lat;lon=COORDS[name].lon;}
+    else{const lower=name.toLowerCase();for(const key of Object.keys(COORDS)){if(key.toLowerCase().includes(lower)||lower.includes(key.toLowerCase())){lat=COORDS[key].lat;lon=COORDS[key].lon;break;}}}
   }
-  if (lat == null && row.location && row.location.lat) lat = row.location.lat;
-  if (lon == null && row.location && row.location.lon) lon = row.location.lon;
-  if (lat != null) lat = Number(lat);
-  if (lon != null) lon = Number(lon);
-  if (!isFinite(lat)) lat = null;
-  if (!isFinite(lon)) lon = null;
-  const name = (row.station || '').trim();
-  if ((lat == null || lon == null) && name){
-    if (COORDS[name]) {
-      lat = COORDS[name].lat;
-      lon = COORDS[name].lon;
-    } else {
-      const lower = name.toLowerCase();
-      for (const key of Object.keys(COORDS)){
-        if (key.toLowerCase().includes(lower) || lower.includes(key.toLowerCase())){
-          lat = COORDS[key].lat;
-          lon = COORDS[key].lon;
-          break;
-        }
-      }
-    }
-  }
-  return (lat != null && lon != null) ? { lat: Number(lat), lon: Number(lon) } : null;
+  return(lat!=null&&lon!=null)?{lat:Number(lat),lon:Number(lon)}:null;
 }
 
-/* Map init */
 function initMap(){
-  if (map) return;
-  map = L.map('map', { zoomControl: true }).setView([ISLAND_CENTER.lat, ISLAND_CENTER.lon], 11);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap contributors' }).addTo(map);
-  markersLayer = L.layerGroup().addTo(map);
-  try { map.fitBounds(ISLAND_BOUNDS, { padding: [40, 40] }); } catch(e){ console.warn(e); }
+  if(map)return;
+  map=L.map('map',{zoomControl:true}).setView([ISLAND_CENTER.lat,ISLAND_CENTER.lon],11);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; OpenStreetMap contributors'}).addTo(map);
+  markersLayer=L.layerGroup().addTo(map);
+  try{map.fitBounds(ISLAND_BOUNDS,{padding:[40,40]});}catch(e){console.warn(e);}
 }
 
-/* Add markers with wind rose in popup */
 function markerColorForSeverity(sev){
-  if (sev === 3) return '#ffb3c7';
-  if (sev === 2) return '#ef4444';
-  if (sev === 1) return '#f59e0b';
-  return '#16a34a';
+  if(sev===3)return'#ffb3c7';if(sev===2)return'#ef4444';if(sev===1)return'#f59e0b';return'#3fcf82';
 }
 function addMarkersToMap(rows){
-  if (!map) initMap();
+  if(!map)initMap();
   markersLayer.clearLayers();
-  const missing = [];
-  rows.forEach(r => {
-    const name = (r.station || '').trim();
-    if (MAP_EXCLUDE.has(name)) return;
-    const coords = extractCoords(r);
-    if (!coords){ missing.push(name || '(unknown)'); return; }
-    const ev = evaluateStation(r);
-    const color = markerColorForSeverity(ev.severity);
-    const circle = L.circleMarker([coords.lat, coords.lon], { radius: 10, fillColor: color, color: '#00000022', weight: 1, fillOpacity: 0.95 });
-    const windDeg = r.wind_direction_deg != null ? Number(r.wind_direction_deg) : null;
-    const windSp = r.wind_speed_knots != null ? Number(r.wind_speed_knots) : null;
-    const roseHtml = windRoseSvg(windDeg, windSp);
-    const popupHtml = `<div style="display:flex;gap:10px;align-items:center;min-width:260px">${roseHtml}<div><strong>${escapeHtml(r.station||'—')}</strong><br/><small style="color:#9fb6c9">${escapeHtml(r.last_updated||'—')}</small><hr style="margin:6px 0;border:none;border-top:1px solid rgba(255,255,255,0.04)"/><div><strong>Temp:</strong> ${r.temperature_c!=null? r.temperature_c.toFixed(1)+' °C':'—'}</div><div><strong>Wind:</strong> ${windSp!=null? windSp+' kn':'—'} (${r.wind_direction_text||'—'})</div></div></div>`;
-    circle.bindPopup(popupHtml, { maxWidth: 420 });
+  rows.forEach(r=>{
+    const name=(r.station||'').trim();
+    if(MAP_EXCLUDE.has(name))return;
+    const coords=extractCoords(r);
+    if(!coords)return;
+    const ev=evaluateStation(r),color=markerColorForSeverity(ev.severity);
+    const circle=L.circleMarker([coords.lat,coords.lon],{radius:10,fillColor:color,color:'#00000022',weight:1,fillOpacity:0.9});
+    const windDeg=r.wind_direction_deg!=null?Number(r.wind_direction_deg):null;
+    const windSp=r.wind_speed_knots!=null?Number(r.wind_speed_knots):null;
+    const roseHtml=windRoseSvg(windDeg,windSp);
+    const popupHtml=`<div style="display:flex;gap:10px;align-items:flex-start;min-width:240px;background:rgba(6,24,42,0.98);padding:12px;border-radius:8px;">${roseHtml}<div style="font-family:'Barlow Condensed',sans-serif;"><strong style="font-size:15px;color:#55c1ff;">${escapeHtml(r.station||'—')}</strong><br/><small style="color:#6a8aaa;">${escapeHtml(r.last_updated||'—')}</small><hr style="margin:8px 0;border:none;border-top:1px solid rgba(55,130,200,0.15)"/><div style="font-size:13px;"><strong>Temp:</strong> ${r.temperature_c!=null?r.temperature_c.toFixed(1)+' °C':'—'}</div><div style="font-size:13px;"><strong>Wind:</strong> ${windSp!=null?windSp+' kn':'—'} (${r.wind_direction_text||'—'})</div></div></div>`;
+    circle.bindPopup(popupHtml,{maxWidth:380,className:'dark-popup'});
     circle.addTo(markersLayer);
   });
-  if (missing.length) console.warn('Missing coords for:', missing);
 }
 
-/* Render stations list */
 function renderStationsList(rows){
-  const list = el('stationsList');
-  if (!rows.length){ list.innerHTML = '<div style="padding:12px;color:var(--muted)">No stations</div>'; return; }
-  let alertCount = 0, staleCount = 0, mostRecent = null;
-  list.innerHTML = rows.map(r => {
-    const ev = evaluateStation(r);
-    if (ev.alerts.length) alertCount++;
-    if (ev.isStaleDate) staleCount++;
-    if (!mostRecent && r.last_updated) mostRecent = r.last_updated;
-    const temp = r.temperature_c !== null ? r.temperature_c.toFixed(1) + '°C' : '—';
-    const windKn = r.wind_speed_knots !== null ? r.wind_speed_knots : null;
-    const windDeg = r.wind_direction_deg !== null ? Number(r.wind_direction_deg) : null;
-    const windText = r.wind_direction_text || r.wind_direction || '—';
-    const rose = windRoseSvg(windDeg, windKn);
-    return `<div class="station-row" data-station="${escapeHtml(r.station)}">
+  const list=el('stationsList');
+  if(!rows.length){list.innerHTML='<div style="padding:20px;color:var(--muted);font-family:var(--cond);letter-spacing:1px;text-transform:uppercase;font-size:12px;">No stations available</div>';return;}
+  let alertCount=0,staleCount=0,mostRecent=null;
+  list.innerHTML=rows.map(r=>{
+    const ev=evaluateStation(r);
+    if(ev.alerts.length)alertCount++;
+    if(ev.isStaleDate)staleCount++;
+    if(!mostRecent&&r.last_updated)mostRecent=r.last_updated;
+    const temp=r.temperature_c!==null?r.temperature_c.toFixed(1)+'°C':'—';
+    const windKn=r.wind_speed_knots!==null?r.wind_speed_knots:null;
+    const windDeg=r.wind_direction_deg!==null?Number(r.wind_direction_deg):null;
+    const windText=r.wind_direction_text||r.wind_direction||'—';
+    const rose=windRoseSvg(windDeg,windKn);
+    return`<div class="station-row">
       <div class="station-top">
-        <div style="display:flex;gap:12px;align-items:center">
+        <div style="display:flex;gap:12px;align-items:center;">
           ${rose}
           <div>
             <div class="station-name">${escapeHtml(r.station)}</div>
-            <div class="muted" style="font-size:13px">${escapeHtml(r.last_updated || '—')}</div>
+            <div class="station-time">${escapeHtml(r.last_updated||'—')}</div>
           </div>
         </div>
-        <div style="display:flex;gap:8px;align-items:center">
-          <div class="param temp"><span class="label">Temp</span><span class="value">${temp}</span></div>
-          <div class="param wind"><span class="label">Wind</span><span class="value">${windKn !== null ? windKn + ' kn' : '—'}</span></div>
+        <div style="display:flex;gap:7px;">
+          <div class="param"><span class="label">Temp</span><span class="value">${temp}</span></div>
+          <div class="param"><span class="label">Wind</span><span class="value">${windKn!==null?windKn+' kn':'—'}</span></div>
         </div>
       </div>
-      <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
-        <div class="param small"><span class="label">Heat</span><span class="value">${r.heat_index_c!=null? r.heat_index_c.toFixed(1)+'°C':'—'}</span></div>
-        <div class="param small"><span class="label">Humidity</span><span class="value">${r.humidity_percent!=null? r.humidity_percent+' %':'—'}</span></div>
-        <div class="param small"><span class="label">Wind dir</span><span class="value">${windText}${windDeg!==null? ' ('+windDeg+'°)':''}</span></div>
-        <div class="param small"><span class="label">Rain today</span><span class="value">${r.rain_today_mm!=null? r.rain_today_mm+' mm':'—'}</span></div>
+      <div class="params-row">
+        <div class="param"><span class="label">Heat idx</span><span class="value" style="font-size:14px;">${r.heat_index_c!=null?r.heat_index_c.toFixed(1)+'°':'—'}</span></div>
+        <div class="param"><span class="label">Humidity</span><span class="value" style="font-size:14px;">${r.humidity_percent!=null?r.humidity_percent+'%':'—'}</span></div>
+        <div class="param"><span class="label">Direction</span><span class="value" style="font-size:14px;">${windText}${windDeg!==null?' ('+windDeg+'°)':''}</span></div>
+        <div class="param"><span class="label">Rain today</span><span class="value" style="font-size:14px;">${r.rain_today_mm!=null?r.rain_today_mm+' mm':'—'}</span></div>
       </div>
     </div>`;
   }).join('');
-  el('totalCount').textContent = rows.length;
-  el('alertCount').textContent = alertCount;
-  el('staleCount').textContent = staleCount;
-  el('mostRecent').textContent = mostRecent || '—';
+  el('totalCount').textContent=rows.length;
+  el('alertCount').textContent=alertCount;
+  el('staleCount').textContent=staleCount;
+  el('mostRecent').textContent=mostRecent||'—';
 }
 
-/* Fetch stations data (tries API, falls back to demo) */
 async function fetchStationsData(){
-  try {
-    let rows = [];
-    try {
-      const res = await fetch(API_BASE, { cache: 'no-store' });
-      if (!res.ok) throw new Error('Network ' + res.status);
-      rows = await res.json();
-    } catch (err) {
-      rows = [
-        { station: 'Curaçao International Airport', temperature_c: 29.1, heat_index_c: 31.0, humidity_percent: 74, wind_speed_knots: 12, wind_direction_deg: 140, wind_direction_text: 'SE', rain_today_mm: 0, last_updated: new Date().toISOString() },
-        { station: 'Seru Mahuma', temperature_c: 28.4, heat_index_c: 29.5, humidity_percent: 70, wind_speed_knots: 8, wind_direction_deg: 160, wind_direction_text: 'SSE', rain_today_mm: 0, last_updated: new Date().toISOString() },
-        { station: 'Santa Maria', temperature_c: 29.6, heat_index_c: 31.2, humidity_percent: 72, wind_speed_knots: 10, wind_direction_deg: 150, wind_direction_text: 'SSE', rain_today_mm: 0, last_updated: new Date().toISOString() },
-        { station: 'Savonet', temperature_c: 27.2, heat_index_c: 27.8, humidity_percent: 68, wind_speed_knots: 6, wind_direction_deg: 120, wind_direction_text: 'ESE', rain_today_mm: 0, last_updated: new Date().toISOString() }
+  try{
+    let rows=[];
+    try{
+      const res=await fetch(API_BASE,{cache:'no-store'});
+      if(!res.ok)throw new Error('Network '+res.status);
+      rows=await res.json();
+    }catch(err){
+      rows=[
+        {station:'Curaçao International Airport',temperature_c:29.1,heat_index_c:31.0,humidity_percent:74,wind_speed_knots:12,wind_direction_deg:140,wind_direction_text:'SE',rain_today_mm:0,last_updated:new Date().toISOString()},
+        {station:'Seru Mahuma',temperature_c:28.4,heat_index_c:29.5,humidity_percent:70,wind_speed_knots:8,wind_direction_deg:160,wind_direction_text:'SSE',rain_today_mm:0,last_updated:new Date().toISOString()},
+        {station:'Santa Maria',temperature_c:29.6,heat_index_c:31.2,humidity_percent:72,wind_speed_knots:10,wind_direction_deg:150,wind_direction_text:'SSE',rain_today_mm:0,last_updated:new Date().toISOString()},
+        {station:'Savonet',temperature_c:27.2,heat_index_c:27.8,humidity_percent:68,wind_speed_knots:6,wind_direction_deg:120,wind_direction_text:'ESE',rain_today_mm:0,last_updated:new Date().toISOString()}
       ];
     }
-
-    rows.forEach(r => {
-      r.temperature_c = safeNum(r.temperature_c);
-      r.heat_index_c = safeNum(r.heat_index_c);
-      r.humidity_percent = safeNum(r.humidity_percent);
-      r.wind_speed_knots = safeNum(r.wind_speed_knots);
-      r.wind_direction_deg = r.wind_direction_deg != null ? safeNum(r.wind_direction_deg) : (r.wind_direction && !isNaN(Number(r.wind_direction)) ? Number(r.wind_direction) : null);
-      r.rain_today_mm = safeNum(r.rain_today_mm);
-      if (r.last_updated_iso) r.last_updated = r.last_updated_iso;
+    rows.forEach(r=>{
+      r.temperature_c=safeNum(r.temperature_c);r.heat_index_c=safeNum(r.heat_index_c);r.humidity_percent=safeNum(r.humidity_percent);
+      r.wind_speed_knots=safeNum(r.wind_speed_knots);r.wind_direction_deg=r.wind_direction_deg!=null?safeNum(r.wind_direction_deg):(r.wind_direction&&!isNaN(Number(r.wind_direction))?Number(r.wind_direction):null);
+      r.rain_today_mm=safeNum(r.rain_today_mm);if(r.last_updated_iso)r.last_updated=r.last_updated_iso;
     });
-
-    currentData = rows;
-    el('stationsLastFetched').textContent = 'Last fetched: ' + new Date().toLocaleString();
-    el('mapLastFetched').textContent = el('stationsLastFetched').textContent;
-    renderStationsList(rows);
-    addMarkersToMap(rows);
-  } catch (e) {
-    console.error('fetchStationsData error', e);
-  }
+    currentData=rows;
+    const ts='Last fetched: '+new Date().toLocaleString();
+    el('stationsLastFetched').textContent=ts;el('mapLastFetched').textContent=ts;
+    renderStationsList(rows);addMarkersToMap(rows);
+  }catch(e){console.error('fetchStationsData error',e);}
 }
 
-/* Map toggle and search */
-document.getElementById('toggleMap').addEventListener('click', () => {
-  const mapCard = document.getElementById('stationsMapCard');
-  const isHidden = mapCard.classList.contains('hidden');
-  if (isHidden) {
-    mapCard.classList.remove('hidden');
-    initMap();
-    addMarkersToMap(currentData);
-    try { map.setView([ISLAND_CENTER.lat, ISLAND_CENTER.lon], 11); setTimeout(()=>map.invalidateSize(),200); } catch(e){}
-  } else {
-    mapCard.classList.add('hidden');
-  }
+document.getElementById('toggleMap').addEventListener('click',()=>{
+  const mapCard=document.getElementById('stationsMapCard');
+  const isHidden=mapCard.classList.contains('hidden');
+  if(isHidden){mapCard.classList.remove('hidden');initMap();addMarkersToMap(currentData);try{map.setView([ISLAND_CENTER.lat,ISLAND_CENTER.lon],11);setTimeout(()=>map.invalidateSize(),200);}catch(e){}}
+  else mapCard.classList.add('hidden');
 });
-el('mapSearch').addEventListener('input', () => {
-  const q = el('mapSearch').value.toLowerCase();
-  const filtered = currentData.filter(r => !q || (r.station && r.station.toLowerCase().includes(q)));
-  addMarkersToMap(filtered);
+el('mapSearch').addEventListener('input',()=>{
+  const q=el('mapSearch').value.toLowerCase();
+  addMarkersToMap(currentData.filter(r=>!q||(r.station&&r.station.toLowerCase().includes(q))));
 });
 
-/* Mode switching between METAR and Stations
-   - When opening Stations mode, hide the METAR, TAF and SYNOP sections completely and show only Stations.
-   - When returning, hide Stations and show METAR, TAF and SYNOP.
-*/
-const metarSectionEl = document.getElementById('metarSection');
-const tafSectionEl = document.getElementById('tafSection');
-const synopSectionEl = document.getElementById('synopSection');
-const stationsSectionEl = document.getElementById('stationsSection');
+/* ── SECTION SWITCHING ── */
+const metarSectionEl=document.getElementById('metarSection');
+const tafSectionEl=document.getElementById('tafSection');
+const synopSectionEl=document.getElementById('synopSection');
+const stationsSectionEl=document.getElementById('stationsSection');
 
-document.getElementById('switchToStations').addEventListener('click', () => {
-  // hide METAR, TAF and SYNOP dashboards entirely
-  if (metarSectionEl) metarSectionEl.classList.add('hidden');
-  if (tafSectionEl) tafSectionEl.classList.add('hidden');
-  if (synopSectionEl) synopSectionEl.classList.add('hidden');
-  // show stations dashboard only
-  if (stationsSectionEl) {
-    stationsSectionEl.classList.remove('hidden');
-    stationsSectionEl.setAttribute('aria-hidden','false');
-  }
-  // fetch stations data when switching
+document.getElementById('switchToStations').addEventListener('click',()=>{
+  metarSectionEl?.classList.add('hidden');tafSectionEl?.classList.add('hidden');synopSectionEl?.classList.add('hidden');
+  stationsSectionEl?.classList.remove('hidden');stationsSectionEl?.setAttribute('aria-hidden','false');
   fetchStationsData();
 });
-
-document.getElementById('backToMetar').addEventListener('click', () => {
-  // hide stations dashboard entirely
-  if (stationsSectionEl) {
-    stationsSectionEl.classList.add('hidden');
-    stationsSectionEl.setAttribute('aria-hidden','true');
-  }
-  // show METAR, TAF and SYNOP dashboards
-  if (metarSectionEl) metarSectionEl.classList.remove('hidden');
-  if (tafSectionEl) tafSectionEl.classList.remove('hidden');
-  if (synopSectionEl) synopSectionEl.classList.remove('hidden');
+document.getElementById('backToMetar').addEventListener('click',()=>{
+  stationsSectionEl?.classList.add('hidden');stationsSectionEl?.setAttribute('aria-hidden','true');
+  metarSectionEl?.classList.remove('hidden');tafSectionEl?.classList.remove('hidden');synopSectionEl?.classList.remove('hidden');
 });
 
-/* Initialize */
+/* ── INIT ── */
 (async function init(){
-  try {
-    buildMetarTable();
-    buildTafTable();
-    buildSynopTable();
-    await Promise.allSettled([ updateVisFromKnmi(), refreshAllMetars() ]);
-    const anyData = STATIONS.some(icao => metarState[icao] && metarState[icao].lastRaw);
-    if (!anyData) {
-      console.warn('No live METAR data loaded — starting Test Mode fallback so UI is visible.');
-      testMode = true;
-      startTestRunner();
-      const b = document.getElementById('test-btn');
-      if (b) b.textContent = 'Exit Test Mode';
+  try{
+    buildMetarTable();buildTafTable();buildSynopTable();
+    await Promise.allSettled([updateVisFromKnmi(),refreshAllMetars()]);
+    const anyData=STATIONS.some(icao=>metarState[icao]&&metarState[icao].lastRaw);
+    if(!anyData){
+      console.warn('No live METAR data — activating test mode.');
+      testMode=true;startTestRunner();
+      const b=document.getElementById('test-btn');if(b)b.textContent='⚗ Exit Test';
     }
-    // prefetch stations so switching is fast
     fetchStationsData();
-  } catch (e) {
-    console.error('initialization error', e);
-    testMode = true;
-    startTestRunner();
-    const b = document.getElementById('test-btn');
-    if (b) b.textContent = 'Exit Test Mode';
+  }catch(e){
+    console.error('initialization error',e);
+    testMode=true;startTestRunner();
+    const b=document.getElementById('test-btn');if(b)b.textContent='⚗ Exit Test';
   }
 })();
 
-/* Expose debug API */
-window.__metarDashboard = { refreshAllMetars, updateVisFromKnmi, loadAllTafs, loadAllSynops, loadTafRow, loadSynopRow, renderMetar, startTestRunner, stopTestRunner, metarState, fetchStationsData };
-
+window.__metarDashboard={refreshAllMetars,updateVisFromKnmi,loadAllTafs,loadAllSynops,renderMetar,startTestRunner,stopTestRunner,metarState,fetchStationsData};
 })();
 </script>
 </body>
