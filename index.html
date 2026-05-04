@@ -493,6 +493,11 @@ tr.taf-change-row td.wx-critical{color:var(--alert)!important;background:var(--a
             <div>
               <div id="vis-value" class="vis-value" role="status" aria-live="polite">—</div>
               <span id="vis-timestamp" class="timestamp" style="display:none"></span>
+              <span style="display:flex;gap:10px;margin-top:4px;font-family:var(--cond);font-size:10px;letter-spacing:1px;">
+                <span style="color:var(--ok)">● ≥8 km</span>
+                <span style="color:var(--warn)">● 2–8 km</span>
+                <span style="color:var(--alert)">● &lt;2 km</span>
+              </span>
             </div>
           </div>
           <button id="vis-refresh-btn" class="btn-primary" aria-label="Refresh Bonaire visibility" style="font-size:11px;padding:6px 10px;height:30px;">↻ Refresh</button>
@@ -766,10 +771,38 @@ function extractKnmiBonaireVisibility(text){
   if(allNums.length){allNums.sort((a,b)=>b.length-a.length||a.localeCompare(b));return`${allNums[0]} m`;}
   return null;
 }
+/* Vis colour thresholds (metres):
+   ≥ 8000 → green (ok)   2000–7999 → amber (warn)   < 2000 → red (alert) */
+function applyVisColor(meters){
+  const DOT=visStatusEl, VAL=visValueEl;
+  DOT.classList.remove('low');
+  if(isNaN(meters)){
+    DOT.style.background='';DOT.style.boxShadow='';
+    VAL.style.color='';return;
+  }
+  let col,shadow;
+  if(meters>=8000){
+    col='var(--ok)';shadow='0 0 0 3px var(--ok-dim),0 0 8px var(--ok)';
+    DOT.classList.remove('low');
+  } else if(meters>=2000){
+    col='var(--warn)';shadow='0 0 0 3px rgba(245,158,11,0.15),0 0 8px var(--warn)';
+    DOT.classList.remove('low');
+  } else {
+    col='var(--alert)';shadow='0 0 0 3px var(--alert-dim),0 0 8px var(--alert)';
+    DOT.classList.add('low');
+  }
+  DOT.style.background=col;DOT.style.boxShadow=shadow;
+  VAL.style.color=col;
+}
+
 async function updateVisFromKnmi(){
   try{
     const out=await fetchWithRetries(KNMI_BONAIRE_URL,MAX_RETRIES);
-    if(!out||!out.ok||!out.text){visValueEl.textContent='—';visStatusEl.classList.remove('low');visTsEl.style.display='none';return;}
+    if(!out||!out.ok||!out.text){
+      visValueEl.textContent='—';visValueEl.style.color='';
+      visStatusEl.classList.remove('low');visStatusEl.style.background='';visStatusEl.style.boxShadow='';
+      visTsEl.style.display='none';return;
+    }
     const rawVis=extractKnmiBonaireVisibility(String(out.text||''));
     if(rawVis){
       const numMatch=rawVis.match(/([0-9]{3,6})/);
@@ -779,14 +812,22 @@ async function updateVisFromKnmi(){
       } else {
         visValueEl.innerHTML=`<span style="font-size:1.7rem">${rawVis.replace(' m','')}</span><span class="vis-unit"> m</span>`;
       }
-      visStatusEl.classList.toggle('low',!isNaN(meters)&&meters<20000);
+      applyVisColor(meters);
+      // re-apply colour to the inner span after innerHTML set
+      const inner=visValueEl.querySelector('span');if(inner)inner.style.color='inherit';
       const local=formatLocalDateTimeParts();
       if(visTsEl){visTsEl.textContent=`Updated ${local.date} ${local.time}`;visTsEl.style.display='block';}
     } else {
-      visValueEl.textContent='—';visStatusEl.classList.remove('low');
+      visValueEl.textContent='—';visValueEl.style.color='';
+      visStatusEl.classList.remove('low');visStatusEl.style.background='';visStatusEl.style.boxShadow='';
       if(visTsEl){visTsEl.textContent='Not found in response';visTsEl.style.display='block';}
     }
-  }catch(e){console.error('updateVisFromKnmi error',e);visValueEl.textContent='—';visStatusEl.classList.remove('low');visTsEl.style.display='none';}
+  }catch(e){
+    console.error('updateVisFromKnmi error',e);
+    visValueEl.textContent='—';visValueEl.style.color='';
+    visStatusEl.classList.remove('low');visStatusEl.style.background='';visStatusEl.style.boxShadow='';
+    visTsEl.style.display='none';
+  }
 }
 
 /* ── METAR PARSING ── */
@@ -1455,7 +1496,7 @@ document.getElementById('backToMetar').addEventListener('click',()=>{
 (async function init(){
   try{
     buildMetarTable();buildTafTable();buildSynopTable();
-    await Promise.allSettled([updateVisFromKnmi(),refreshAllMetars()]);
+    await Promise.allSettled([updateVisFromKnmi(),refreshAllMetars(),loadAllTafs(),loadAllSynops()]);
     const anyData=STATIONS.some(icao=>metarState[icao]&&metarState[icao].lastRaw);
     if(!anyData){
       console.warn('No live METAR data — activating test mode.');
