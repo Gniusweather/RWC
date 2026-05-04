@@ -317,7 +317,8 @@ tr.raw td{
 #taf-table{font-size:20px;}
 #taf-table th{font-size:11px;padding:13px 16px;letter-spacing:2px;}
 #taf-table td{font-size:19px;padding:16px 16px;color:#ffffff;}
-#taf-table td.station{font-size:26px;}
+/* ── FIX: TAF station names match METAR accent colour ── */
+#taf-table td.station{color:var(--accent);font-size:26px;font-family:var(--cond);font-weight:800;letter-spacing:1.5px;}
 #taf-table td.time{font-size:17px;}
 #taf-table td.wind{font-size:18px;font-weight:700;}
 #taf-table td.clouds{font-size:17px;}
@@ -1012,7 +1013,6 @@ function parseTaf(rawText){
   else if(tMin!==null)td=`TN ${tMin}°`;
 
   // Split into segments on TEMPO / BECMG / PROB / FM keywords
-  // We split on word boundary before those keywords
   const CHANGE_RE=/\b(TEMPO|BECMG|PROB\d{2}(?:\s+TEMPO)?|FM\d{6})\b/g;
   const splitPoints=[];
   let m2;
@@ -1030,18 +1030,15 @@ function parseTaf(rawText){
   for(let i=0;i<splitPoints.length;i++){
     const {idx,keyword}=splitPoints[i];
     const segEnd=i+1<splitPoints.length?splitPoints[i+1].idx:full.length;
-    // skip the keyword itself to get the payload
     const segBody=full.slice(idx+keyword.length,segEnd).trim();
     const seg=parseTafSegment(segBody,full);
 
-    // Determine type for CSS class and label
     let type='TEMPO',label=keyword;
     if(/^FM/.test(keyword)){type='FM';const hhmm=keyword.slice(4,8);label=`FM ${hhmm.slice(0,2)}:${hhmm.slice(2)}`;}
     else if(/^BECMG/.test(keyword)){type='BECMG';label='BECMG';}
     else if(/^PROB\d{2}\s+TEMPO/.test(keyword)){type='TEMPO';label=keyword;}
     else if(/^PROB\d{2}/.test(keyword)){type='PROB';label=keyword;}
 
-    // Extract the period token DDHH/DDHH from segment body
     const periodMatch=segBody.match(/^(\d{4}\/\d{4})/);
     const period=periodMatch?periodMatch[1]:'';
 
@@ -1071,12 +1068,10 @@ const TAF_ICAOS = STATIONS.slice(0,3); // TNCA, TNCB, TNCC
 function buildTafTable(){
   tafTbody.innerHTML='';
   TAF_ICAOS.forEach(icao=>{
-    // Placeholder base row (will be replaced by renderTafRow)
     const tr=document.createElement('tr');
     tr.dataset.icao=icao;
     tr.dataset.tafBase='1';
     tr.innerHTML=`<td class="station">${icao}</td><td class="time">--</td><td class="wind">--</td><td>--</td><td class="wx">--</td><td class="clouds">--</td><td>--</td><td>--</td>`;
-    // Raw row
     const rr=document.createElement('tr');
     rr.className='taf-raw-row';
     rr.dataset.icao=icao;
@@ -1131,13 +1126,12 @@ function renderTafRow(icao, rawText){
     cr.dataset.icao=icao;
     cr.innerHTML=`<td>${ch.label}</td><td class="time">--</td><td class="wind">--</td><td>--</td><td class="wx">--</td><td class="clouds">--</td><td>--</td><td>--</td>`;
     const ctds=cr.querySelectorAll('td');
-    // Valid / period — show the period in the time column if present
     ctds[1].textContent=ch.period||'--';
     ctds[2].textContent=ch.wind;
     ctds[3].textContent=ch.vis;
     ctds[4].textContent=ch.wx;
     ctds[5].textContent=ch.cld;
-    ctds[6].textContent='—'; // no separate temp per change group
+    ctds[6].textContent='—';
     ctds[7].textContent=ch.qnh;
     applyTafAlerts(ctds,ch);
     if(insertBefore){tafTbody.insertBefore(cr,insertBefore);}
@@ -1200,7 +1194,6 @@ const TEST_SAMPLES=[
   {'TNCA':'TNCA 152020Z 12010KT 9999 FEW020 SCT040 28/24 Q1013','TNCB':'TNCB 152020Z 08008KT 9999 FEW025 SCT050 26/22 Q1015','TNCC':'TNCC 152020Z 14012KT 9999 SCT030 BKN050 27/25 Q1008','TNCM':'TNCM 152020Z 18012KT 9999 FEW020 SCT040 26/24 Q1005','SVMI':'SVMI 152020Z 20015KT 9999 FEW020 SCT030 29/27 Q1009','SVVA':'SVVA 152020Z 06008KT 9999 FEW020 SCT040 24/22 Q1010'}
 ];
 
-// TAF test data with TEMPO / BECMG / PROB / FM change groups
 const TAF_TEST_SAMPLES={
   'TNCA':'TAF TNCA 011730Z 0118/0218 35025G40KT 9999 FEW020CB TX31/0215Z TN24/0206Z TEMPO 0120/0124 35035G55KT 0500 +TSRA FEW013CB BKN020 BECMG 0202/0204 12015KT 9999 FEW025 FM020600 09010KT 9999 SCT030',
   'TNCB':'TAF TNCB 011730Z 0118/0218 34018G30KT 9999 SCT025 TX29/0214Z TN23/0207Z TEMPO 0119/0122 0400 +TSRA FEW018CB BKN025 PROB30 TEMPO 0122/0124 0800 SHRA SCT020 BECMG 0206/0208 09012KT 9999 FEW030',
