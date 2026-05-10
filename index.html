@@ -1031,6 +1031,100 @@ buildSynopTable();
 
 function escapeHtml(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 
+/* ── SYNOP DECODER ── */
+function decodeSynop(synopStr){
+  const tokens=synopStr.trim().split(/\s+/);
+  const result={
+    raw:synopStr,
+    datetime:'—',
+    station:'—',
+    wind_direction:'—',
+    wind_speed:'—',
+    visibility:'—',
+    weather:'—',
+    cloud_cover:'—',
+    temp:'—',
+    dew_point:'—',
+    pressure:'—',
+    sea_level_pressure:'—',
+    trend:'—'
+  };
+
+  // 1st group: datetime (12 digits like 202605101800)
+  if(tokens[0]&&/^\d{12}$/.test(tokens[0])){
+    const dt=tokens[0];
+    result.datetime=`${dt.slice(0,4)}-${dt.slice(4,6)}-${dt.slice(6,8)} ${dt.slice(8,10)}:${dt.slice(10,12)}Z`;
+  }
+
+  // Find AAXX or similar header
+  const headerIdx=tokens.findIndex(t=>/^[A-Z]{4}/.test(t));
+  if(headerIdx===-1)return result;
+
+  // 3rd group (IIiii): station type and location
+  if(tokens[headerIdx+1]&&/^\d{5}$/.test(tokens[headerIdx+1])){
+    const group=tokens[headerIdx+1];
+    const lat=parseInt(group.slice(1,3));
+    const lon=parseInt(group.slice(3,5));
+    result.station=`${lat}°N ${lon}°W`;
+  }
+
+  // 4th group (ddff): wind direction and speed
+  if(tokens[headerIdx+2]&&/^\d{4,5}$/.test(tokens[headerIdx+2])){
+    const group=tokens[headerIdx+2];
+    let dd,ff;
+    if(group.length===5&&group[0]==='0'){
+      dd=parseInt(group.slice(1,3))*10;ff=parseInt(group.slice(3,5));
+    }else if(group.length===4){
+      dd=parseInt(group.slice(0,2))*10;ff=parseInt(group.slice(2,4));
+    }
+    if(!isNaN(dd)&&!isNaN(ff)){
+      const dirs=['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
+      const dirIdx=Math.round(dd/22.5)%16;
+      result.wind_direction=dirs[dirIdx];
+      result.wind_speed=ff+' kt';
+    }
+  }
+
+  // 5th group (VVhh): visibility
+  if(tokens[headerIdx+3]&&/^\d{4,5}$/.test(tokens[headerIdx+3])){
+    const group=tokens[headerIdx+3];
+    const vv=parseInt(group.slice(0,2));
+    let visKm='—';
+    if(vv===90)visKm='≥40 km';
+    else if(vv<90)visKm=Math.pow(10,(vv/50)).toFixed(1)+' km';
+    result.visibility=visKm;
+  }
+
+  // 6th group (Nddff): cloud cover
+  if(tokens[headerIdx+4]){
+    const group=tokens[headerIdx+4];
+    if(/^[0-9]/.test(group)){
+      const n=parseInt(group[0]);
+      const cloudMap=['SKC','FEW','FEW','SCT','SCT','BKN','BKN','BKN','OVC','OVC'];
+      result.cloud_cover=cloudMap[n]||'—';
+    }
+  }
+
+  // 7th group (TT/Td): temperature and dew point
+  if(tokens[headerIdx+5]&&/^(M|[0-9])\d{2}\/(M|[0-9])\d{2}$/.test(tokens[headerIdx+5])){
+    const group=tokens[headerIdx+5];
+    const parts=group.split('/');
+    const t=parseInt(parts[0].replace('M','-'));
+    const td=parseInt(parts[1].replace('M','-'));
+    if(!isNaN(t))result.temp=t+'°C';
+    if(!isNaN(td))result.dew_point=td+'°C';
+  }
+
+  // 8th group (PPPP): pressure
+  if(tokens[headerIdx+6]&&/^\d{4}$/.test(tokens[headerIdx+6])){
+    const pp=parseInt(tokens[headerIdx+6]);
+    const hpa=(pp>5000?10000-pp:pp+1000)/10;
+    result.pressure=hpa.toFixed(1)+' hPa';
+  }
+
+  return result;
+}
+
 async function loadSynopRow(index,url){
   try{
     const out=await fetchWithRetries(url,MAX_RETRIES);
@@ -1052,22 +1146,70 @@ async function loadSynopsFromOgimet(){
     const data=await res.json();
     if(!data.contents)throw new Error('No content');
     const text=data.contents;
-    // Extract SYNOP lines (start with date like 202605101800 followed by AAXX)
     const synopLines=text.split('\n').filter(line=>/^\d{12}\s+AAXX/.test(line.trim()));
-    synopLines.slice(0,5).forEach(line=>{
+    
+    // Add decoded SYNOP as first row
+    if(synopLines.length>0){
+      const decoded=decodeSynop(synopLines[0]);
+      const tr=document.createElement('tr');
+      tr.innerHTML=`<td colspan="2" style="padding:0;border:none;">
+        <div style="background:linear-gradient(135deg,rgba(27,124,255,0.15),rgba(27,124,255,0.05));border:1px solid rgba(85,193,255,0.2);border-radius:10px;padding:18px;margin-bottom:12px;">
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;">
+            <div style="background:rgba(6,24,42,0.6);border:1px solid rgba(85,193,255,0.15);border-radius:8px;padding:12px;">
+              <div style="font-family:var(--cond);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">DateTime</div>
+              <div style="font-family:var(--mono);font-size:15px;color:#55c1ff;font-weight:700;">${escaped(decoded.datetime)}</div>
+            </div>
+            <div style="background:rgba(6,24,42,0.6);border:1px solid rgba(85,193,255,0.15);border-radius:8px;padding:12px;">
+              <div style="font-family:var(--cond);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Location</div>
+              <div style="font-family:var(--cond);font-size:14px;color:#fff;font-weight:700;">${escaped(decoded.station)}</div>
+            </div>
+            <div style="background:rgba(6,24,42,0.6);border:1px solid rgba(85,193,255,0.15);border-radius:8px;padding:12px;">
+              <div style="font-family:var(--cond);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Wind</div>
+              <div style="font-family:var(--cond);font-size:14px;color:#fff;font-weight:700;">${escaped(decoded.wind_direction)} ${escaped(decoded.wind_speed)}</div>
+            </div>
+            <div style="background:rgba(6,24,42,0.6);border:1px solid rgba(85,193,255,0.15);border-radius:8px;padding:12px;">
+              <div style="font-family:var(--cond);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Visibility</div>
+              <div style="font-family:var(--cond);font-size:14px;color:#fff;font-weight:700;">${escaped(decoded.visibility)}</div>
+            </div>
+            <div style="background:rgba(6,24,42,0.6);border:1px solid rgba(85,193,255,0.15);border-radius:8px;padding:12px;">
+              <div style="font-family:var(--cond);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Cloud Cover</div>
+              <div style="font-family:var(--cond);font-size:14px;color:#fff;font-weight:700;">${escaped(decoded.cloud_cover)}</div>
+            </div>
+            <div style="background:rgba(6,24,42,0.6);border:1px solid rgba(85,193,255,0.15);border-radius:8px;padding:12px;">
+              <div style="font-family:var(--cond);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Temp / Dew</div>
+              <div style="font-family:var(--cond);font-size:14px;color:#fff;font-weight:700;">${escaped(decoded.temp)} / ${escaped(decoded.dew_point)}</div>
+            </div>
+            <div style="background:rgba(6,24,42,0.6);border:1px solid rgba(85,193,255,0.15);border-radius:8px;padding:12px;">
+              <div style="font-family:var(--cond);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Pressure</div>
+              <div style="font-family:var(--cond);font-size:14px;color:#fff;font-weight:700;">${escaped(decoded.pressure)}</div>
+            </div>
+          </div>
+          <div style="margin-top:12px;padding:10px;background:rgba(4,16,28,0.5);border-radius:6px;border-left:3px solid rgba(85,193,255,0.3);">
+            <div style="font-family:var(--mono);font-size:11px;color:rgba(200,225,255,0.75);word-break:break-all;line-height:1.6;">${escaped(decoded.raw)}</div>
+          </div>
+        </div>
+      </td>`;
+      synopTbody.appendChild(tr);
+    }
+    
+    // Add raw rows for additional reports
+    synopLines.slice(0,3).forEach(line=>{
       const trimmed=line.trim();
       if(!trimmed)return;
       const tr=document.createElement('tr');
-      tr.innerHTML=`<td class="station" style="font-size:20px;letter-spacing:1px;">Latest Curaçao<br><span style="font-size:11px;color:var(--muted);">Ogimet</span></td><td><div class="synop-raw"></div></td>`;
+      tr.innerHTML=`<td class="station" style="font-size:18px;letter-spacing:1px;">Curaçao<br><span style="font-size:11px;color:var(--muted);">Ogimet Raw</span></td><td><div class="synop-raw"></div></td>`;
       tr.querySelector('.synop-raw').textContent=trimmed;
       synopTbody.appendChild(tr);
     });
+    
     const local=formatLocalDateTimeParts();
     if(synopUpdatedEl)synopUpdatedEl.textContent=`SYNOP last updated: ${local.date} ${local.time}`;
   }catch(e){
     console.error('loadSynopsFromOgimet error',e);
   }
 }
+
+function escaped(s){return String(s||'—').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 
 async function loadAllSynops(){
   const SYNOP_URLS=[
