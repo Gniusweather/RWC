@@ -1029,6 +1029,8 @@ function buildSynopTable(){
 }
 buildSynopTable();
 
+function escapeHtml(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
 async function loadSynopRow(index,url){
   try{
     const out=await fetchWithRetries(url,MAX_RETRIES);
@@ -1040,6 +1042,33 @@ async function loadSynopRow(index,url){
     }
   }catch(e){console.error('loadSynopRow error',index,e);}
 }
+
+async function loadSynopsFromOgimet(){
+  try{
+    const txtUrl='https://www.ogimet.com/ultimos_synops2.php?lang=en&estado=Cura&fmt=txt&Send=Send';
+    const proxyUrl='https://api.allorigins.win/get?url='+encodeURIComponent(txtUrl);
+    const res=await fetchWithTimeout(proxyUrl,REQUEST_TIMEOUT_MS);
+    if(!res||!res.ok)throw new Error('Proxy fetch failed');
+    const data=await res.json();
+    if(!data.contents)throw new Error('No content');
+    const text=data.contents;
+    // Extract SYNOP lines (start with date like 202605101800 followed by AAXX)
+    const synopLines=text.split('\n').filter(line=>/^\d{12}\s+AAXX/.test(line.trim()));
+    synopLines.slice(0,5).forEach(line=>{
+      const trimmed=line.trim();
+      if(!trimmed)return;
+      const tr=document.createElement('tr');
+      tr.innerHTML=`<td class="station" style="font-size:20px;letter-spacing:1px;">Latest Curaçao<br><span style="font-size:11px;color:var(--muted);">Ogimet</span></td><td><div class="synop-raw"></div></td>`;
+      tr.querySelector('.synop-raw').textContent=trimmed;
+      synopTbody.appendChild(tr);
+    });
+    const local=formatLocalDateTimeParts();
+    if(synopUpdatedEl)synopUpdatedEl.textContent=`SYNOP last updated: ${local.date} ${local.time}`;
+  }catch(e){
+    console.error('loadSynopsFromOgimet error',e);
+  }
+}
+
 async function loadAllSynops(){
   const SYNOP_URLS=[
     'https://tgftp.nws.noaa.gov/data/raw/si/sinu50.tnca..txt',
@@ -1048,6 +1077,7 @@ async function loadAllSynops(){
     'https://tgftp.nws.noaa.gov/data/raw/sm/smca01.tncc..txt'
   ];
   await Promise.all(SYNOP_URLS.map((u,i)=>loadSynopRow(i,u)));
+  await loadSynopsFromOgimet();
 }
 
 /* ── TEST MODE ── */
