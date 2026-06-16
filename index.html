@@ -35,6 +35,7 @@
   --mono:'Space Mono', ui-monospace, monospace;
   --sans:'Barlow', system-ui, sans-serif;
   --cond:'Barlow Condensed', system-ui, sans-serif;
+  --dashboard-blue: #062a6f;
   --glow-accent: 0 0 24px rgba(85,193,255,0.12);
   --glow-alert: 0 0 20px rgba(255,95,95,0.18);
   --th-bg: rgba(8,30,56,0.97);
@@ -47,24 +48,54 @@
 
 /* ── NIGHT MODE ── */
 :root.night{
-  --bg:#080400;--panel:#0f0800;--card:rgba(14,8,0,0.98);
-  --border:rgba(100,50,0,0.2);--border-bright:rgba(160,80,0,0.22);
-  --text:#fff5e0;--muted:#7a6040;--accent:#cc8800;--accent-strong:#aa6600;
-  --accent-dim:rgba(180,110,0,0.12);--alert:#ff4040;--alert-dim:rgba(255,64,64,0.1);
-  --ok:#28a060;--ok-dim:rgba(40,160,96,0.1);
-  --glow-accent:0 0 20px rgba(160,80,0,0.1);--glow-alert:0 0 18px rgba(255,64,64,0.15);
-  --shadow:0 16px 40px rgba(0,0,0,0.85);--shadow-sm:0 4px 16px rgba(0,0,0,0.7);
-  --th-bg:rgba(18,10,0,0.99);--raw-bg:rgba(10,5,0,0.95);--statusbar-bg:rgba(10,5,0,0.8);
-  --table-card-bg:rgba(14,8,0,0.85);--station-row-bg1:rgba(18,10,0,0.95);--station-row-bg2:rgba(12,6,0,0.95);
+  --bg:#080400;
+  --panel:#0f0800;
+  --card:rgba(14,8,0,0.98);
+  --border:rgba(100,50,0,0.2);
+  --border-bright:rgba(160,80,0,0.22);
+  --text:#fff5e0;
+  --muted:#7a6040;
+  --accent:#cc8800;
+  --accent-strong:#aa6600;
+  --accent-dim:rgba(180,110,0,0.12);
+  --alert:#ff4040;
+  --alert-dim:rgba(255,64,64,0.1);
+  --ok:#28a060;
+  --ok-dim:rgba(40,160,96,0.1);
+  --glow-accent: 0 0 20px rgba(160,80,0,0.1);
+  --glow-alert: 0 0 18px rgba(255,64,64,0.15);
+  --shadow: 0 16px 40px rgba(0,0,0,0.85);
+  --shadow-sm: 0 4px 16px rgba(0,0,0,0.7);
+  --th-bg: rgba(18,10,0,0.99);
+  --raw-bg: rgba(10,5,0,0.95);
+  --statusbar-bg: rgba(10,5,0,0.8);
+  --table-card-bg: rgba(14,8,0,0.85);
+  --station-row-bg1: rgba(18,10,0,0.95);
+  --station-row-bg2: rgba(12,6,0,0.95);
 }
-:root.night body::before{background:radial-gradient(ellipse 900px 500px at 10% 0%,rgba(120,40,0,0.08) 0%,transparent 60%),radial-gradient(ellipse 600px 400px at 90% 80%,rgba(100,30,0,0.05) 0%,transparent 55%),radial-gradient(ellipse 400px 300px at 50% 40%,rgba(80,20,0,0.04) 0%,transparent 60%);}
-:root.night body::after{background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.08) 2px,rgba(0,0,0,0.08) 4px);}
-:root.night .page::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;background:rgba(20,5,0,0.18);}
+
+:root.night body::before{
+  background:
+    radial-gradient(ellipse 900px 500px at 10% 0%, rgba(120,40,0,0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 600px 400px at 90% 80%, rgba(100,30,0,0.05) 0%, transparent 55%),
+    radial-gradient(ellipse 400px 300px at 50% 40%, rgba(80,20,0,0.04) 0%, transparent 60%);
+}
+:root.night body::after{
+  background:repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.08) 2px, rgba(0,0,0,0.08) 4px);
+}
+:root.night .page::after{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
+  background:rgba(20,5,0,0.18);
+}
 :root.night .widget-head{background:linear-gradient(90deg,rgba(120,60,0,0.22),rgba(100,40,0,0.06));}
 :root.night .weather-widget::before{background:linear-gradient(90deg,var(--accent-strong),var(--accent),transparent);}
 :root.night .section-title::before{background:linear-gradient(90deg,var(--accent-strong),transparent);}
-:root.night .time-updated{background:rgba(160,80,0,0.2)!important;}
-:root.night .btn-primary{background:linear-gradient(180deg,rgba(140,70,0,0.9),rgba(100,46,0,0.9));border-color:rgba(160,80,0,0.35);box-shadow:0 4px 14px rgba(140,70,0,0.2),inset 0 1px 0 rgba(255,200,100,0.08);}
+:root.night .time-updated{background:rgba(160,80,0,0.2) !important;}
+:root.night .btn-primary{
+  background:linear-gradient(180deg,rgba(140,70,0,0.9),rgba(100,46,0,0.9));
+  border-color:rgba(160,80,0,0.35);
+  box-shadow:0 4px 14px rgba(140,70,0,0.2),inset 0 1px 0 rgba(255,200,100,0.08);
+}
 :root.night .btn-primary:hover{background:linear-gradient(180deg,rgba(170,85,0,0.95),rgba(120,56,0,0.95));}
 :root.night .header-title{color:var(--accent);text-shadow:0 0 30px rgba(160,80,0,0.35);}
 :root.night .clock-time{text-shadow:0 0 20px rgba(160,80,0,0.3);}
@@ -76,17 +107,28 @@
 :root.night .pill span{color:var(--accent);}
 :root.night .dot.ok{background:#28a060;box-shadow:0 0 4px #28a060;}
 :root.night .dot.warn{background:#cc3030;box-shadow:0 0 4px #cc3030;}
-:root.night .tab-btn.active{background:rgba(160,80,0,0.25);border-color:rgba(160,80,0,0.5);color:var(--accent);}
-:root.night .tab-btn:hover:not(.active){background:rgba(160,80,0,0.1);}
 
-html,body,.weather-widget,.table-card,.stations-card,.station-row,th,td,.btn-ghost,.btn-primary,.status-bar,.pill,.param,.section-title,.header-title,.clock-time,.footer-brand,.tab-btn{
-  transition:background 0.4s ease,color 0.3s ease,border-color 0.3s ease,box-shadow 0.3s ease;
+html,body,
+.weather-widget,.table-card,.stations-card,.station-row,
+th,td,.btn-ghost,.btn-primary,.status-bar,.pill,
+.param,.section-title,.header-title,.clock-time,.footer-brand{
+  transition:background 0.4s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 *,*::before,*::after{box-sizing:border-box;}
-html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);-webkit-text-size-adjust:100%;overflow-x:hidden;}
-body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;background:radial-gradient(ellipse 900px 500px at 10% 0%,rgba(27,124,255,0.06) 0%,transparent 60%),radial-gradient(ellipse 600px 400px at 90% 80%,rgba(85,193,255,0.04) 0%,transparent 55%),radial-gradient(ellipse 400px 300px at 50% 40%,rgba(63,207,130,0.02) 0%,transparent 60%);}
-body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.03) 2px,rgba(0,0,0,0.03) 4px);}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);-webkit-text-size-adjust:100%;overflow-x:hidden;transition:background 0.4s ease,color 0.3s ease;}
+
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(ellipse 900px 500px at 10% 0%, rgba(27,124,255,0.06) 0%, transparent 60%),
+    radial-gradient(ellipse 600px 400px at 90% 80%, rgba(85,193,255,0.04) 0%, transparent 55%),
+    radial-gradient(ellipse 400px 300px at 50% 40%, rgba(63,207,130,0.02) 0%, transparent 60%);
+}
+body::after{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
+}
 
 .page{width:100%;position:relative;z-index:1;padding:14px 18px;display:flex;flex-direction:column;align-items:center;gap:14px;min-height:100vh;}
 
@@ -94,175 +136,384 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;back
 .top-row{width:100%;max-width:1240px;display:grid;grid-template-columns:var(--widget-width) 1fr auto;align-items:center;gap:14px;}
 
 /* ── WIDGET ── */
-.weather-widget{border-radius:var(--radius-lg);background:var(--card);box-shadow:var(--shadow),var(--glow-accent);border:1px solid var(--border-bright);overflow:hidden;position:relative;}
-.weather-widget::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent-strong),var(--accent),transparent);}
-.widget-head{padding:11px 14px;display:flex;gap:10px;align-items:center;background:linear-gradient(90deg,rgba(27,124,255,0.18),rgba(27,124,255,0.04));border-bottom:1px solid var(--border);}
+.weather-widget{
+  border-radius:var(--radius-lg);background:var(--card);
+  box-shadow:var(--shadow),var(--glow-accent);
+  border:1px solid var(--border-bright);overflow:hidden;
+  position:relative;
+}
+.weather-widget::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--accent-strong),var(--accent),transparent);
+}
+.widget-head{
+  padding:11px 14px;display:flex;gap:10px;align-items:center;
+  background:linear-gradient(90deg,rgba(27,124,255,0.18),rgba(27,124,255,0.04));
+  border-bottom:1px solid var(--border);
+}
 .widget-head .icon{font-size:18px;line-height:1;}
 .widget-head .title{font-family:var(--cond);font-weight:700;font-size:15px;letter-spacing:0.5px;color:var(--accent);text-transform:uppercase;}
 .widget-content{padding:14px;}
 .vis-wrap{display:flex;align-items:center;gap:10px;}
-.status-dot{width:9px;height:9px;border-radius:50%;background:var(--ok);flex-shrink:0;box-shadow:0 0 0 3px var(--ok-dim),0 0 8px var(--ok);animation:pulse-ok 2.5s ease-in-out infinite;}
-.status-dot.low{background:var(--alert);box-shadow:0 0 0 3px var(--alert-dim),0 0 8px var(--alert);animation:pulse-alert 1.2s ease-in-out infinite;}
-.status-dot.mid{background:var(--warn);box-shadow:0 0 0 3px rgba(245,158,11,0.15),0 0 8px var(--warn);animation:pulse-ok 2s ease-in-out infinite;}
+.status-dot{
+  width:9px;height:9px;border-radius:50%;background:var(--ok);flex-shrink:0;
+  box-shadow:0 0 0 3px var(--ok-dim),0 0 8px var(--ok);
+  animation:pulse-ok 2.5s ease-in-out infinite;
+}
+.status-dot.low{
+  background:var(--alert);box-shadow:0 0 0 3px var(--alert-dim),0 0 8px var(--alert);
+  animation:pulse-alert 1.2s ease-in-out infinite;
+}
 @keyframes pulse-ok{0%,100%{opacity:1}50%{opacity:0.6}}
 @keyframes pulse-alert{0%,100%{opacity:1}50%{opacity:0.4}}
+
 .vis-value{font-family:var(--cond);font-weight:800;font-size:1.7rem;letter-spacing:0.5px;line-height:1;color:#fff;}
 .vis-unit{font-family:var(--cond);font-weight:400;font-size:1rem;color:var(--muted);margin-left:2px;}
 .timestamp{margin-top:5px;color:var(--muted);font-size:11px;font-family:var(--mono);display:block;letter-spacing:0.3px;}
 
-/* ── HEADER ── */
+/* ── HEADER BLOCK ── */
 .header-block{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;}
-.header-title{font-family:var(--cond);font-size:22px;letter-spacing:2px;font-weight:800;color:var(--accent);text-transform:uppercase;margin:0;text-shadow:0 0 30px rgba(85,193,255,0.3);}
+.header-title{
+  font-family:var(--cond);font-size:22px;letter-spacing:2px;font-weight:800;
+  color:var(--accent);text-transform:uppercase;margin:0;
+  text-shadow:0 0 30px rgba(85,193,255,0.3);
+}
 .header-sub{font-family:var(--cond);font-size:11px;letter-spacing:3px;font-weight:400;color:var(--muted);text-transform:uppercase;}
 .header-clocks{display:flex;gap:28px;align-items:center;}
 .clock-group{display:flex;flex-direction:column;align-items:center;gap:2px;}
 .clock-label{font-family:var(--cond);font-size:10px;letter-spacing:2.5px;color:var(--muted);text-transform:uppercase;}
-.clock-time{font-family:var(--mono);font-size:28px;color:#fff;font-weight:700;letter-spacing:1px;text-shadow:0 0 20px rgba(85,193,255,0.25);}
+.clock-time{
+  font-family:var(--mono);font-size:28px;color:#fff;font-weight:700;letter-spacing:1px;
+  text-shadow:0 0 20px rgba(85,193,255,0.25);
+}
 .clock-date{font-family:var(--cond);font-size:12px;color:var(--muted);letter-spacing:0.5px;}
 .clock-sep{width:1px;height:44px;background:linear-gradient(180deg,transparent,var(--border-bright),transparent);}
 
 /* ── CONTROLS ── */
 .controls-wrap{display:flex;flex-direction:column;gap:7px;align-items:flex-end;}
-.btn-primary{padding:8px 14px;border-radius:8px;border:1px solid rgba(27,124,255,0.3);background:linear-gradient(180deg,rgba(27,124,255,0.9),rgba(11,90,200,0.9));color:#fff;cursor:pointer;font-family:var(--cond);font-weight:700;font-size:13px;letter-spacing:0.8px;text-transform:uppercase;box-shadow:0 4px 14px rgba(27,124,255,0.25),inset 0 1px 0 rgba(255,255,255,0.12);height:34px;display:inline-flex;align-items:center;gap:8px;white-space:nowrap;}
+.btn-primary{
+  padding:8px 14px;border-radius:8px;border:1px solid rgba(27,124,255,0.3);
+  background:linear-gradient(180deg,rgba(27,124,255,0.9),rgba(11,90,200,0.9));
+  color:#fff;cursor:pointer;font-family:var(--cond);font-weight:700;font-size:13px;
+  letter-spacing:0.8px;text-transform:uppercase;
+  box-shadow:0 4px 14px rgba(27,124,255,0.25),inset 0 1px 0 rgba(255,255,255,0.12);
+  height:34px;display:inline-flex;align-items:center;gap:8px;
+  transition:all 0.15s ease;white-space:nowrap;
+}
 .btn-primary:hover{background:linear-gradient(180deg,rgba(40,140,255,0.95),rgba(20,100,220,0.95));box-shadow:0 6px 20px rgba(27,124,255,0.35);}
 .btn-primary:active{transform:translateY(1px);}
 .btn-primary[disabled]{opacity:.5;cursor:not-allowed;}
-.btn-ghost{padding:7px 12px;border-radius:8px;border:1px solid var(--border);background:rgba(255,255,255,0.02);color:var(--accent);cursor:pointer;font-family:var(--cond);font-size:12px;letter-spacing:0.8px;text-transform:uppercase;font-weight:600;height:34px;white-space:nowrap;}
+.btn-ghost{
+  padding:7px 12px;border-radius:8px;border:1px solid var(--border);
+  background:rgba(255,255,255,0.02);color:var(--accent);cursor:pointer;
+  font-family:var(--cond);font-size:12px;letter-spacing:0.8px;text-transform:uppercase;
+  font-weight:600;height:34px;transition:all 0.15s ease;white-space:nowrap;
+}
 .btn-ghost:hover{background:rgba(85,193,255,0.06);border-color:var(--border-bright);}
 .btn-row{display:flex;gap:7px;align-items:center;}
 
-/* ── TABS ── */
-.tab-bar{width:100%;max-width:1240px;display:flex;gap:4px;padding:0;margin-bottom:2px;}
-.tab-btn{
-  padding:9px 20px;border-radius:8px 8px 0 0;border:1px solid var(--border);border-bottom:none;
-  background:rgba(6,24,42,0.4);color:var(--muted);cursor:pointer;
-  font-family:var(--cond);font-size:13px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;
-  display:inline-flex;align-items:center;gap:8px;
-  position:relative;bottom:-1px;
-}
-.tab-btn:hover:not(.active){background:rgba(85,193,255,0.05);color:var(--accent);}
-.tab-btn.active{
-  background:rgba(6,24,42,0.96);color:var(--accent);border-color:var(--border-bright);
-  box-shadow:0 -2px 8px rgba(85,193,255,0.08);
-}
-.tab-btn.active::before{
-  content:'';position:absolute;top:0;left:0;right:0;height:2px;
-  background:linear-gradient(90deg,var(--accent-strong),var(--accent),transparent);
-  border-radius:8px 8px 0 0;
-}
-.tab-badge{
-  background:rgba(85,193,255,0.15);color:var(--accent);
-  font-family:var(--mono);font-size:10px;padding:1px 6px;border-radius:10px;
-  font-weight:700;letter-spacing:0;
-}
-.tab-badge.alert{background:rgba(255,95,95,0.15);color:var(--alert);}
-
 /* ── CONTENT WRAPPER ── */
 .content-wrapper{width:100%;max-width:1240px;}
-.tab-panel{display:none;}
-.tab-panel.active{display:block;}
-.table-wrapper{width:100%;margin:0;padding:0;}
+.table-wrapper{width:100%;margin:10px 0;padding:0;}
 
 /* ── SECTION HEADER ── */
-.section-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;padding:0 2px;}
-.section-title{font-family:var(--cond);font-size:13px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:8px;}
-.section-title::before{content:'';width:16px;height:2px;background:linear-gradient(90deg,var(--accent-strong),transparent);border-radius:2px;}
+.section-header{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-bottom:10px;padding:0 2px;
+}
+.section-title{
+  font-family:var(--cond);font-size:13px;font-weight:700;letter-spacing:2.5px;
+  text-transform:uppercase;color:var(--muted);
+  display:flex;align-items:center;gap:8px;
+}
+.section-title::before{
+  content:'';width:16px;height:2px;
+  background:linear-gradient(90deg,var(--accent-strong),transparent);
+  border-radius:2px;
+}
 .section-controls{display:flex;gap:8px;align-items:center;}
 
 /* ── TABLES ── */
-.table-card{border-radius:0 var(--radius-lg) var(--radius-lg) var(--radius-lg);overflow:hidden;border:1px solid var(--border-bright);box-shadow:var(--shadow-sm);background:var(--table-card-bg);backdrop-filter:blur(8px);}
+.table-card{
+  border-radius:var(--radius-lg);overflow:hidden;
+  border:1px solid var(--border);
+  box-shadow:var(--shadow-sm);
+  background:var(--table-card-bg);
+  backdrop-filter:blur(8px);
+}
 table{width:100%;border-collapse:collapse;font-family:var(--mono);color:#ffffff;font-size:20px;}
 thead{position:sticky;top:0;z-index:2;}
-th{background:var(--th-bg);color:var(--muted);font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:2px;padding:13px 16px;border-bottom:1px solid var(--border-bright);font-family:var(--cond);text-align:center;white-space:nowrap;}
+th{
+  background:var(--th-bg);color:var(--muted);font-weight:700;
+  font-size:11px;text-transform:uppercase;letter-spacing:2px;padding:13px 16px;
+  border-bottom:1px solid var(--border-bright);font-family:var(--cond);
+  text-align:center;white-space:nowrap;
+}
 th:first-child{text-align:left;padding-left:20px;}
-td{padding:16px 16px;border-bottom:1px solid rgba(32,52,80,0.5);text-align:center;vertical-align:middle;font-size:19px;color:#ffffff;letter-spacing:0.3px;}
+td{
+  padding:16px 16px;border-bottom:1px solid rgba(32,52,80,0.5);
+  text-align:center;vertical-align:middle;font-size:19px;color:#ffffff;
+  transition:background 0.2s;letter-spacing:0.3px;
+}
 td:first-child{text-align:left;padding-left:20px;}
 tr:last-child td{border-bottom:none;}
 tbody tr:hover td{background:rgba(85,193,255,0.04);}
-td.station{font-family:var(--cond);font-weight:800;color:var(--accent);font-size:26px;letter-spacing:1.5px;}
+
+td.station{
+  font-family:var(--cond);font-weight:800;color:var(--accent);font-size:26px;
+  letter-spacing:1.5px;
+  position:sticky;left:0;z-index:1;
+  background:var(--table-card-bg);
+  border-right:2px solid rgba(85,193,255,0.1) !important;
+}
+tbody tr:hover td.station{background:rgba(6,24,42,0.95) !important;}
+
+/* Station cell internals */
+.flag{font-size:22px;margin-right:8px;vertical-align:middle;line-height:1;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.4));}
+.icao-code{vertical-align:middle;}
+.station-sub{
+  display:block;font-size:11px;font-weight:500;letter-spacing:1.5px;
+  color:var(--muted);text-transform:uppercase;margin-top:1px;padding-left:32px;
+  font-family:var(--cond);
+}
+
 td.time{font-size:17px;color:#ffffff;font-family:var(--mono);}
 td.wind{font-size:18px;color:#ffffff;font-weight:700;}
 td.clouds{font-size:17px;color:#ffffff;}
+td.vis-cell{color:#ffffff;}
+td.wx{color:#ffffff;}
+td.qnh-cell{color:#ffffff;}
 
-/* Status */
-tr.stale td{opacity:.5;}
+/* ── CELL BORDER COLOR CODING (no font color change) ── */
+/* Time age */
+td.time.age-warn{box-shadow:inset 0 0 0 2px rgba(245,158,11,0.55);}
+td.time.age-stale{box-shadow:inset 0 0 0 2px rgba(255,95,95,0.65);}
+/* Wind speed */
+td.wind.wind-moderate{box-shadow:inset 0 0 0 2px rgba(245,158,11,0.55);}
+td.wind.wind-strong{box-shadow:inset 0 0 0 2px rgba(255,140,66,0.65);}
+td.wind.wind-gust{box-shadow:inset 0 0 0 2px rgba(255,95,95,0.75),0 0 10px rgba(255,95,95,0.15);}
+/* Vis */
+td.vis-reduced{box-shadow:inset 0 0 0 2px rgba(245,158,11,0.55);}
+td.vis-poor{box-shadow:inset 0 0 0 2px rgba(255,140,66,0.65);}
+td.vis-fog{box-shadow:inset 0 0 0 2px rgba(255,95,95,0.75),0 0 10px rgba(255,95,95,0.12);}
+/* WX present */
+td.wx.wx-present{box-shadow:inset 0 0 0 2px rgba(245,158,11,0.5);}
+td.wx.wx-heavy{box-shadow:inset 0 0 0 2px rgba(255,140,66,0.65);}
+/* Clouds coverage */
+td.clouds.cld-sct{box-shadow:inset 0 0 0 2px rgba(245,158,11,0.45);}
+td.clouds.cld-bkn{box-shadow:inset 0 0 0 2px rgba(255,140,66,0.6);}
+td.clouds.cld-ovc{box-shadow:inset 0 0 0 2px rgba(255,95,95,0.65);}
+/* QNH */
+td.qnh-low{box-shadow:inset 0 0 0 2px rgba(255,140,66,0.6);}
+
+/* ── ZEBRA + HOVER ── */
+tbody tr.data-row:nth-child(4n+1) td,
+tbody tr.data-row:nth-child(4n+2) td{background:transparent;}
+tbody tr.data-row:nth-child(4n+3) td,
+tbody tr.data-row:nth-child(4n+4) td{background:rgba(85,193,255,0.016);}
+tbody tr.data-row:hover td{background:rgba(85,193,255,0.06) !important;}
+
+/* Click-to-expand raw rows */
+tr.data-row{cursor:pointer;}
+tr.data-row td.station::after{
+  content:' ›';font-size:14px;color:rgba(85,193,255,0.3);
+  display:inline-block;margin-left:4px;transition:color 0.2s;
+}
+tr.data-row.raw-open td.station::after{content:' ‹';color:var(--accent);}
+
+/* ── CRITICAL PULSE ANIMATION ── */
+@keyframes criticalPulse{
+  0%,100%{background:var(--alert-dim);}
+  50%{background:rgba(255,95,95,0.16);}
+}
+td.clouds.cloud-critical{
+  color:var(--alert) !important;background:var(--alert-dim) !important;
+  animation:criticalPulse 1.8s ease-in-out infinite;
+}
+td.wx.wx-critical{
+  color:var(--alert) !important;background:var(--alert-dim) !important;
+  animation:criticalPulse 1.8s ease-in-out infinite;
+}
+
+/* Status cells */
+tr.stale td{opacity:.45;}
 tr.stale td.station::after{content:' ∅';font-size:12px;color:var(--alert);}
-td.alert{color:var(--alert)!important;background:var(--alert-dim)!important;}
-td.clouds.cloud-critical{color:var(--alert)!important;background:var(--alert-dim)!important;box-shadow:inset 0 0 16px rgba(255,95,95,0.08);}
-td.wx.wx-critical{color:var(--alert)!important;background:var(--alert-dim)!important;}
-.time-updated{background:rgba(27,124,255,0.18)!important;color:#fff!important;font-weight:700;}
-.time-updated.dim{opacity:0.4!important;}
+td.alert{color:var(--alert) !important;background:var(--alert-dim) !important;}
+
+/* Time updated highlight */
+.time-updated{
+  background:rgba(27,124,255,0.2) !important;color:#fff !important;
+  font-weight:700;transition:all 0.6s;
+}
+.time-updated.dim{opacity:0.4 !important;}
 
 /* Raw rows */
-tr.raw td{background:var(--raw-bg);text-align:left;color:#ffffff;padding:10px 20px;white-space:pre-wrap;font-size:12px;border-top:none;border-bottom:1px solid rgba(32,52,80,0.6);font-family:var(--mono);letter-spacing:0.3px;line-height:1.6;}
+tr.raw td{
+  background:var(--raw-bg);text-align:left;color:#ffffff;
+  padding:10px 20px;white-space:pre-wrap;font-size:12px;border-top:none;
+  border-bottom:1px solid rgba(32,52,80,0.6);font-family:var(--mono);
+  letter-spacing:0.3px;line-height:1.6;
+}
 .raw-current{font-size:12px;color:#ffffff;display:block;white-space:pre-wrap;opacity:0.92;}
-.raw-past{margin-top:6px;font-size:11px;color:rgba(200,220,255,0.55);display:block;padding-top:6px;border-top:1px solid rgba(32,52,80,0.5);}
+.raw-past{
+  margin-top:6px;font-size:11px;color:rgba(200,220,255,0.55);display:block;
+  padding-top:6px;border-top:1px solid rgba(32,52,80,0.5);
+}
 
-/* Status bar */
-.status-bar{display:flex;justify-content:space-between;align-items:center;padding:8px 16px;background:var(--statusbar-bg);border-top:1px solid var(--border);font-size:11px;color:var(--muted);font-family:var(--mono);letter-spacing:0.3px;}
-.status-bar .dot-live{width:6px;height:6px;border-radius:50%;background:var(--ok);display:inline-block;margin-right:6px;box-shadow:0 0 6px var(--ok);animation:pulse-ok 2s infinite;}
+/* Last updated bar */
+.status-bar{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:8px 16px;background:var(--statusbar-bg);border-top:1px solid var(--border);
+  border-radius:0 0 var(--radius-lg) var(--radius-lg);font-size:11px;color:var(--muted);
+  font-family:var(--mono);letter-spacing:0.3px;
+}
+.status-bar .dot-live{
+  width:6px;height:6px;border-radius:50%;background:var(--ok);
+  display:inline-block;margin-right:6px;
+  box-shadow:0 0 6px var(--ok);animation:pulse-ok 2s infinite;
+}
 
-/* ── TAF TABLE ── */
+/* ── TAF TABLE — same sizing as METAR ── */
 #taf-table{font-size:20px;}
 #taf-table th{font-size:11px;padding:13px 16px;letter-spacing:2px;}
 #taf-table td{font-size:19px;padding:16px 16px;color:#ffffff;}
+/* ── FIX: TAF station names match METAR accent colour ── */
 #taf-table td.station{color:var(--accent);font-size:26px;font-family:var(--cond);font-weight:800;letter-spacing:1.5px;}
 #taf-table td.time{font-size:17px;}
 #taf-table td.wind{font-size:18px;font-weight:700;}
 #taf-table td.clouds{font-size:17px;}
 
-tr.taf-raw-row td{background:var(--raw-bg);text-align:left;color:#ffffff;padding:10px 20px;white-space:pre-wrap;font-size:12px;border-top:none;border-bottom:1px solid rgba(32,52,80,0.6);font-family:var(--mono);letter-spacing:0.3px;line-height:1.6;}
+/* TAF raw row */
+tr.taf-raw-row td{
+  background:var(--raw-bg);text-align:left;color:#ffffff;
+  padding:10px 20px;white-space:pre-wrap;font-size:12px;border-top:none;
+  border-bottom:1px solid rgba(32,52,80,0.6);font-family:var(--mono);
+  letter-spacing:0.3px;line-height:1.6;
+}
 .taf-raw-text{font-size:12px;color:rgba(200,225,255,0.85);display:block;white-space:pre-wrap;word-break:break-word;line-height:1.65;}
 
-tr.taf-change-row td{padding:10px 16px;border-bottom:1px solid rgba(32,52,80,0.35);font-size:15px;color:rgba(200,225,255,0.82);vertical-align:middle;background:rgba(4,14,28,0.55);}
-tr.taf-change-row td:first-child{padding-left:20px;font-family:var(--cond);font-weight:700;font-size:13px;letter-spacing:1.5px;text-transform:uppercase;white-space:nowrap;}
+/* TAF change-group sub-rows (TEMPO / BECMG / PROB / FM) */
+tr.taf-change-row td{
+  padding:10px 16px;border-bottom:1px solid rgba(32,52,80,0.35);
+  font-size:15px;color:rgba(200,225,255,0.82);vertical-align:middle;
+  background:rgba(4,14,28,0.55);
+}
+tr.taf-change-row td:first-child{
+  padding-left:20px;font-family:var(--cond);font-weight:700;font-size:13px;
+  letter-spacing:1.5px;text-transform:uppercase;white-space:nowrap;
+}
+tr.taf-change-row:last-of-type td{border-bottom:1px solid rgba(32,52,80,0.5);}
 tr.taf-change-row:hover td{background:rgba(85,193,255,0.04);}
+/* type-specific left accent */
 tr.taf-change-row.type-TEMPO td:first-child{color:#f59e0b;}
 tr.taf-change-row.type-BECMG td:first-child{color:#3fcf82;}
-tr.taf-change-row.type-PROB td:first-child{color:#a78bfa;}
-tr.taf-change-row.type-FM td:first-child{color:#55c1ff;}
+tr.taf-change-row.type-PROB  td:first-child{color:#a78bfa;}
+tr.taf-change-row.type-FM    td:first-child{color:#55c1ff;}
+/* alert colours in sub-rows */
 tr.taf-change-row td.alert{color:var(--alert)!important;background:var(--alert-dim)!important;}
 tr.taf-change-row td.cloud-critical{color:var(--alert)!important;background:var(--alert-dim)!important;}
 tr.taf-change-row td.wx-critical{color:var(--alert)!important;background:var(--alert-dim)!important;}
+/* night mode tints */
 :root.night tr.taf-change-row td{background:rgba(12,6,0,0.6);color:rgba(220,180,100,0.7);}
 :root.night tr.taf-change-row.type-TEMPO td:first-child{color:#cc8800;}
 :root.night tr.taf-change-row.type-BECMG td:first-child{color:#28a060;}
-:root.night tr.taf-change-row.type-PROB td:first-child{color:#9370db;}
-:root.night tr.taf-change-row.type-FM td:first-child{color:#cc8800;}
+:root.night tr.taf-change-row.type-PROB  td:first-child{color:#9370db;}
+:root.night tr.taf-change-row.type-FM    td:first-child{color:#cc8800;}
 
-/* ── SYNOP TABLE — bigger font ── */
-#synop-table{font-size:18px;}
-#synop-table th{font-size:12px;padding:12px 18px;letter-spacing:2px;}
-#synop-table td{font-size:16px;padding:14px 18px;color:#ffffff;}
-#synop-table td.station{font-family:var(--cond);font-weight:800;color:var(--accent);font-size:22px;letter-spacing:1.5px;}
-.synop-raw{font-family:var(--mono);font-size:16px;color:rgba(200,225,255,0.95);white-space:pre-wrap;word-break:break-word;line-height:1.7;letter-spacing:0.4px;}
+/* ── COLUMN DIVIDERS ── */
+th{border-right:1px solid rgba(85,193,255,0.06);}
+th:last-child{border-right:none;}
+td{border-right:1px solid rgba(85,193,255,0.04);}
+td:last-child{border-right:none;}
+tr.raw td,tr.taf-raw-row td,tr.taf-change-row td{border-right:none !important;}
+
+/* ── METAR LEGEND BAR ── */
+.metar-legend{
+  display:flex;gap:18px;align-items:center;flex-wrap:wrap;
+  padding:8px 18px;border-top:1px solid var(--border);
+  background:var(--statusbar-bg);font-family:var(--cond);font-size:11px;
+  letter-spacing:0.8px;text-transform:uppercase;color:var(--muted);
+}
+.metar-legend .leg{display:flex;align-items:center;gap:6px;}
+.leg-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+
+/* SYNOP table — upgraded */
+#synop-table{font-size:15px;}
+#synop-table th{font-size:10px;padding:11px 16px;letter-spacing:2px;}
+#synop-table td{font-size:14px;padding:16px 18px;color:#ffffff;vertical-align:top;border-right:none;}
+#synop-table td.station{
+  font-family:var(--cond);font-weight:800;font-size:18px;color:var(--accent);
+  letter-spacing:1px;white-space:nowrap;vertical-align:top;padding-top:18px;
+  min-width:160px;position:sticky;left:0;background:var(--table-card-bg);
+  border-right:2px solid rgba(85,193,255,0.1) !important;
+}
+.synop-raw{
+  font-family:var(--mono);font-size:14px;color:#ffffff;
+  white-space:pre-wrap;word-break:break-word;line-height:2.1;letter-spacing:0.5px;
+}
+/* SYNOP token colors */
+.synop-raw .tok-station{color:#55c1ff;font-weight:700;font-size:15px;}
+.synop-raw .tok-time{color:#f59e0b;font-weight:700;}
+.synop-raw .tok-wind{color:#3fcf82;font-weight:700;}
+.synop-raw .tok-vis{color:#cc88ff;font-weight:700;}
+.synop-raw .tok-cloud{color:#ff8c42;font-weight:700;}
+.synop-raw .tok-temp{color:#ff6b9d;font-weight:700;}
+.synop-raw .tok-pressure{color:#5dd1e8;font-weight:700;}
+.synop-raw .tok-section{color:rgba(255,255,255,0.28);font-size:12px;}
 
 /* ── STATIONS DASHBOARD ── */
-.stations-card{margin-top:8px;padding:16px;border-radius:var(--radius-lg);background:rgba(6,24,42,0.6);border:1px solid var(--border);backdrop-filter:blur(8px);}
+.stations-card{
+  margin-top:8px;padding:16px;border-radius:var(--radius-lg);
+  background:rgba(6,24,42,0.6);border:1px solid var(--border);
+  backdrop-filter:blur(8px);
+}
 .stations-header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px;}
 .stations-title{font-family:var(--cond);font-size:18px;font-weight:800;letter-spacing:1.5px;color:var(--accent);text-transform:uppercase;}
 .stations-sub{font-family:var(--cond);font-size:11px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-top:2px;}
 .stations{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:12px;}
-.station-row{padding:14px;border-radius:10px;background:linear-gradient(135deg,var(--station-row-bg1),var(--station-row-bg2));border:1px solid rgba(55,130,200,0.1);position:relative;overflow:hidden;}
-.station-row::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(85,193,255,0.2),transparent);}
+
+.station-row{
+  padding:14px;border-radius:10px;
+  background:linear-gradient(135deg,var(--station-row-bg1),var(--station-row-bg2));
+  border:1px solid rgba(55,130,200,0.1);
+  transition:all 0.2s ease;position:relative;overflow:hidden;
+}
+.station-row::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(85,193,255,0.2),transparent);
+}
 .station-row:hover{border-color:rgba(85,193,255,0.18);background:linear-gradient(135deg,rgba(12,35,60,0.95),rgba(8,24,44,0.95));}
 .station-top{display:flex;justify-content:space-between;align-items:center;}
 .station-name{font-family:var(--cond);font-weight:700;font-size:15px;color:var(--accent);letter-spacing:0.5px;}
 .station-time{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:2px;}
-.param{background:rgba(255,255,255,0.03);padding:7px 11px;border-radius:7px;font-size:12px;color:var(--muted);display:inline-flex;flex-direction:column;align-items:center;gap:2px;border:1px solid rgba(255,255,255,0.04);}
+.param{
+  background:rgba(255,255,255,0.03);padding:7px 11px;border-radius:7px;
+  font-size:12px;color:var(--muted);display:inline-flex;flex-direction:column;
+  align-items:center;gap:2px;border:1px solid rgba(255,255,255,0.04);
+}
 .param .label{font-family:var(--cond);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);}
 .param .value{font-family:var(--cond);font-weight:700;font-size:16px;color:#d0e8ff;}
 .params-row{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px;}
 .wind-rose{width:70px;height:70px;flex-shrink:0;}
 .wind-rose svg{width:100%;height:100%;}
+
+/* Summary pills */
 .summary{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;}
-.pill{padding:5px 12px;border-radius:20px;background:rgba(255,255,255,0.03);border:1px solid var(--border);font-family:var(--cond);font-size:12px;color:var(--muted);letter-spacing:0.5px;}
+.pill{
+  padding:5px 12px;border-radius:20px;background:rgba(255,255,255,0.03);
+  border:1px solid var(--border);font-family:var(--cond);font-size:12px;
+  color:var(--muted);letter-spacing:0.5px;
+}
 .pill span{color:var(--accent);font-weight:700;}
 
 /* Map */
 .map-container{height:58vh;border-radius:10px;overflow:hidden;margin-top:12px;border:1px solid var(--border);}
 #map{width:100%;height:100%;}
-.legend{background:rgba(6,18,34,0.92);padding:10px 12px;border-radius:8px;color:var(--text);font-family:var(--cond);font-size:12px;border:1px solid var(--border);backdrop-filter:blur(8px);}
+.legend{
+  background:rgba(6,18,34,0.92);padding:10px 12px;border-radius:8px;
+  color:var(--text);font-family:var(--cond);font-size:12px;
+  border:1px solid var(--border);backdrop-filter:blur(8px);
+}
 .legend .row{display:flex;align-items:center;gap:8px;margin-bottom:5px;letter-spacing:0.3px;}
 .legend .row:last-child{margin-bottom:0;}
 .dot{width:11px;height:11px;border-radius:50%;flex-shrink:0;}
@@ -270,19 +521,34 @@ tr.taf-change-row td.wx-critical{color:var(--alert)!important;background:var(--a
 .dot.warn{background:var(--alert);box-shadow:0 0 6px var(--alert);}
 .dot.danger{background:#ff8a5b;box-shadow:0 0 6px #ff8a5b;}
 .dot.error{background:#ffb3c7;box-shadow:0 0 6px #ffb3c7;}
-.map-search{padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:rgba(255,255,255,0.04);color:var(--text);font-family:var(--sans);font-size:13px;width:240px;outline:none;}
+
+/* Map search */
+.map-search{
+  padding:8px 12px;border-radius:8px;border:1px solid var(--border);
+  background:rgba(255,255,255,0.04);color:var(--text);font-family:var(--sans);
+  font-size:13px;width:240px;outline:none;transition:border-color 0.2s;
+}
 .map-search:focus{border-color:var(--border-bright);}
 .map-search::placeholder{color:var(--muted);}
 
 /* ── FOOTER ── */
-.footer{width:100%;max-width:1240px;margin-top:20px;padding:14px 0;display:flex;align-items:center;justify-content:space-between;border-top:1px solid rgba(55,130,200,0.08);}
+.footer{
+  width:100%;max-width:1240px;margin-top:20px;padding:14px 0;
+  display:flex;align-items:center;justify-content:space-between;
+  border-top:1px solid rgba(55,130,200,0.08);
+}
 .footer-brand{font-family:var(--cond);font-size:13px;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;}
 .footer-note{font-family:var(--sans);font-size:11px;color:rgba(106,138,170,0.6);letter-spacing:0.3px;}
 
 /* ── ANIMATIONS ── */
-.hidden{display:none!important;}
+.hidden{display:none !important;}
+.hidden-row{display:none !important;}
 .flash-blue{animation:flashBlue 500ms ease-in-out;}
-@keyframes flashBlue{0%{background:rgba(27,124,255,0.2);}50%{background:rgba(27,124,255,0.3);}100%{background:transparent;}}
+@keyframes flashBlue{
+  0%{background:rgba(27,124,255,0.2);}
+  50%{background:rgba(27,124,255,0.3);}
+  100%{background:transparent;}
+}
 @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
 .fade-in{animation:fadeIn 0.3s ease-out both;}
 
@@ -295,11 +561,9 @@ tr.taf-change-row td.wx-critical{color:var(--alert)!important;background:var(--a
   td{font-size:13px;padding:10px 10px;}
   td.station{font-size:17px;}
   .clock-time{font-size:22px;}
-  #synop-table td{font-size:14px;}
-  #synop-table .synop-raw{font-size:14px;}
+  #synop-table td{font-size:12px;}
   #taf-table td{font-size:13px;padding:10px 10px;}
   #taf-table td.station{font-size:17px;}
-  .tab-btn{font-size:11px;padding:8px 12px;}
 }
 </style>
 </head>
@@ -322,9 +586,9 @@ tr.taf-change-row td.wx-critical{color:var(--alert)!important;background:var(--a
               <div id="vis-value" class="vis-value" role="status" aria-live="polite">—</div>
               <span id="vis-timestamp" class="timestamp" style="display:none"></span>
               <span style="display:flex;gap:10px;margin-top:4px;font-family:var(--cond);font-size:10px;letter-spacing:1px;">
-                <span style="color:var(--ok)">● ≥10 km</span>
-                <span style="color:var(--warn)">● 5–10 km</span>
-                <span style="color:var(--alert)">● &lt;5 km</span>
+                <span style="color:var(--ok)">● &gt;10 km</span>
+                <span style="color:var(--warn)">● 6–9 km</span>
+                <span style="color:var(--alert)">● ≤5 km</span>
               </span>
             </div>
           </div>
@@ -339,7 +603,7 @@ tr.taf-change-row td.wx-critical{color:var(--alert)!important;background:var(--a
         <div class="header-sub">Caribbean</div>
         <div class="header-title">Regional Weather Centre</div>
       </div>
-      <div class="header-clocks">
+      <div class="header-clocks" aria-hidden="false">
         <div class="clock-group">
           <div class="clock-label">Local</div>
           <div id="local-clock" class="clock-time">--:--:--</div>
@@ -359,139 +623,127 @@ tr.taf-change-row td.wx-critical{color:var(--alert)!important;background:var(--a
       <div class="btn-row">
         <button id="mute-btn" class="btn-ghost" aria-pressed="false">🔊 Mute</button>
         <button id="test-btn" class="btn-ghost">⚗ Test Mode</button>
-        <button id="night-btn" class="btn-ghost" aria-pressed="false">🌙 Night</button>
+        <button id="night-btn" class="btn-ghost" aria-pressed="false" title="Toggle Night Mode">🌙 Night</button>
       </div>
-      <button id="refresh-btn" class="btn-primary">↻ Refresh All</button>
+      <button id="refresh-btn" class="btn-primary" title="Refresh METARs & Vis">↻ Refresh All</button>
     </div>
-  </div>
-
-  <!-- ═══ TAB BAR ═══ -->
-  <div class="tab-bar" role="tablist" aria-label="Data sections">
-    <button class="tab-btn active" id="tab-metar" role="tab" aria-selected="true" aria-controls="panel-metar" data-panel="metar">
-      📡 METAR <span class="tab-badge" id="badge-metar">6</span>
-    </button>
-    <button class="tab-btn" id="tab-taf" role="tab" aria-selected="false" aria-controls="panel-taf" data-panel="taf">
-      📋 TAF <span class="tab-badge" id="badge-taf">3</span>
-    </button>
-    <button class="tab-btn" id="tab-synop" role="tab" aria-selected="false" aria-controls="panel-synop" data-panel="synop">
-      🌡 SYNOP <span class="tab-badge" id="badge-synop">4</span>
-    </button>
-    <button class="tab-btn" id="tab-stations" role="tab" aria-selected="false" aria-controls="panel-stations" data-panel="stations">
-      ⊞ Stations
-    </button>
   </div>
 
   <!-- ═══ CONTENT ═══ -->
   <div class="content-wrapper">
 
-    <!-- METAR Panel -->
-    <div id="panel-metar" class="tab-panel active fade-in" role="tabpanel" aria-labelledby="tab-metar">
-      <div class="table-wrapper">
-        <div class="section-header">
-          <div class="section-title">METAR Observations</div>
-          <div class="section-controls">
-            <button id="metar-refresh-btn" class="btn-primary" style="font-size:11px;height:30px;padding:6px 12px;">↻ METAR</button>
-          </div>
+    <!-- METAR Section -->
+    <div id="metarSection" class="table-wrapper fade-in">
+      <div class="section-header">
+        <div class="section-title">METAR Observations</div>
+        <div class="section-controls">
+          <button id="metar-refresh-btn" class="btn-primary" style="font-size:11px;height:30px;padding:6px 12px;" title="Refresh METAR">↻ METAR</button>
+          <button id="switchToStations" class="btn-ghost">⊞ Stations Dashboard</button>
         </div>
-        <div class="table-card">
-          <table class="metar-table" aria-label="METAR list">
-            <thead>
-              <tr><th>ICAO</th><th>Time (Z)</th><th>Wind</th><th>Vis</th><th>Wx</th><th>Cloud</th><th>Temp / Dew</th><th>QNH (hPa / inHg)</th></tr>
-            </thead>
-            <tbody id="metar"></tbody>
-          </table>
-          <div class="status-bar">
-            <span><span class="dot-live"></span><span id="last-updated">METAR last updated: --:--</span></span>
-            <span style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:rgba(106,138,170,0.5);">Auto-refresh every 30s</span>
-          </div>
+      </div>
+      <div class="table-card">
+        <table class="metar-table" aria-label="METAR list">
+          <thead>
+            <tr>
+              <th>ICAO</th><th>Time (Z)</th><th>Wind</th><th>Vis</th><th>Wx</th><th>Cloud</th><th>Temp / Dew</th><th>QNH (hPa / inHg)</th>
+            </tr>
+          </thead>
+          <tbody id="metar"></tbody>
+        </table>
+        <div class="metar-legend">
+          <div class="leg"><div class="leg-dot" style="background:rgba(245,158,11,0.8)"></div>Moderate / Reduced</div>
+          <div class="leg"><div class="leg-dot" style="background:rgba(255,140,66,0.9)"></div>Strong / Poor</div>
+          <div class="leg"><div class="leg-dot" style="background:#ff5f5f"></div>Gust / Critical</div>
+          <div style="margin-left:auto;color:rgba(138,171,204,0.4);font-size:10px;">Click row to expand raw METAR</div>
+        </div>
+        <div class="status-bar">
+          <span><span class="dot-live"></span><span id="last-updated">METAR last updated: --:--</span></span>
+          <span style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:rgba(106,138,170,0.5);">Auto-refresh every 30s</span>
         </div>
       </div>
     </div>
 
-    <!-- TAF Panel -->
-    <div id="panel-taf" class="tab-panel fade-in" role="tabpanel" aria-labelledby="tab-taf">
-      <div class="table-wrapper">
-        <div class="section-header">
-          <div class="section-title">Terminal Aerodrome Forecast</div>
-          <div class="section-controls">
-            <button id="taf-refresh-btn" class="btn-primary" style="font-size:11px;height:30px;padding:6px 12px;">↻ Load TAFs</button>
-          </div>
+    <!-- TAF Section -->
+    <div id="tafSection" class="table-wrapper fade-in">
+      <div class="section-header">
+        <div class="section-title">Terminal Aerodrome Forecast</div>
+        <div class="section-controls">
+          <button id="taf-refresh-btn" class="btn-primary" style="font-size:11px;height:30px;padding:6px 12px;" title="Load TAFs">↻ Load TAFs</button>
         </div>
-        <div class="table-card">
-          <table id="taf-table" aria-label="TAF list">
-            <thead>
-              <tr><th>ICAO</th><th>Valid (Z)</th><th>Wind</th><th>Vis</th><th>Wx</th><th>Cloud</th><th>Temp / Dew</th><th>QNH (hPa / inHg)</th></tr>
-            </thead>
-            <tbody id="taf"></tbody>
-          </table>
-          <div class="status-bar"><span id="taf-updated" style="color:var(--muted)">TAF last updated: --:--</span></div>
-        </div>
+      </div>
+      <div class="table-card">
+        <table id="taf-table" aria-label="TAF list">
+          <thead>
+            <tr>
+              <th>ICAO</th><th>Valid (Z)</th><th>Wind</th><th>Vis</th><th>Wx</th><th>Cloud</th><th>Temp / Dew</th><th>QNH (hPa / inHg)</th>
+            </tr>
+          </thead>
+          <tbody id="taf"></tbody>
+        </table>
+        <div class="status-bar"><span id="taf-updated" style="color:var(--muted)">TAF last updated: --:--</span></div>
       </div>
     </div>
 
-    <!-- SYNOP Panel -->
-    <div id="panel-synop" class="tab-panel fade-in" role="tabpanel" aria-labelledby="tab-synop">
-      <div class="table-wrapper">
-        <div class="section-header">
-          <div class="section-title">SYNOP Reports</div>
-          <div class="section-controls">
-            <button id="synop-refresh-btn" class="btn-primary" style="font-size:11px;height:30px;padding:6px 12px;">↻ Load SYNOPs</button>
-          </div>
-        </div>
-        <div class="table-card">
-          <table id="synop-table" aria-label="SYNOP list">
-            <thead><tr><th style="text-align:left;padding-left:18px;">Source</th><th style="text-align:left;">Raw SYNOP</th></tr></thead>
-            <tbody id="synop"></tbody>
-          </table>
-          <div class="status-bar"><span id="synop-updated" style="color:var(--muted)">SYNOP last updated: --:--</span></div>
+    <!-- SYNOP Section -->
+    <div id="synopSection" class="table-wrapper fade-in">
+      <div class="section-header">
+        <div class="section-title">SYNOP Reports</div>
+        <div class="section-controls">
+          <button id="synop-refresh-btn" class="btn-primary" style="font-size:11px;height:30px;padding:6px 12px;" title="Load SYNOPs">↻ Load SYNOPs</button>
         </div>
       </div>
-    </div>
-
-    <!-- Stations Panel -->
-    <div id="panel-stations" class="tab-panel fade-in" role="tabpanel" aria-labelledby="tab-stations">
-      <section id="stationsSection" class="stations-card" aria-hidden="false">
-        <div class="stations-header">
-          <div>
-            <div class="stations-title">Stations Dashboard</div>
-            <div class="stations-sub">Live surface observations · Wind roses · Map view</div>
-          </div>
-          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-            <span id="stationsLastFetched" style="color:var(--muted);font-size:11px;font-family:var(--mono);">Last fetched: —</span>
-            <button id="toggleMap" class="btn-primary" style="font-size:11px;height:30px;padding:6px 12px;">🗺 Map View</button>
-          </div>
-        </div>
-
-        <div id="stationsList" class="stations" aria-live="polite">
-          <div style="padding:20px;color:var(--muted);font-family:var(--cond);letter-spacing:1px;text-transform:uppercase;font-size:12px;">Loading stations…</div>
-        </div>
-
-        <div class="summary">
-          <div class="pill">Total: <span id="totalCount">0</span></div>
-          <div class="pill">Alerts: <span id="alertCount">0</span></div>
-          <div class="pill">Stale: <span id="staleCount">0</span></div>
-          <div class="pill">Most recent: <span id="mostRecent">—</span></div>
-        </div>
-
-        <div id="stationsMapCard" class="hidden" style="margin-top:14px;">
-          <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
-            <div style="display:flex;gap:10px;align-items:center;">
-              <input id="mapSearch" type="text" class="map-search" placeholder="Filter stations on map…"/>
-              <span style="color:var(--muted);font-family:var(--mono);font-size:11px;" id="mapLastFetched">Last fetched: —</span>
-            </div>
-            <div class="legend" id="mapLegend">
-              <div class="row"><div class="dot ok"></div><span>OK</span></div>
-              <div class="row"><div class="dot warn"></div><span>Alert</span></div>
-              <div class="row"><div class="dot danger"></div><span>Critical</span></div>
-              <div class="row"><div class="dot error"></div><span>Date mismatch</span></div>
-            </div>
-          </div>
-          <div class="map-container"><div id="map"></div></div>
-        </div>
-      </section>
+      <div class="table-card">
+        <table id="synop-table" aria-label="SYNOP list">
+          <thead><tr><th style="text-align:left;padding-left:18px;">Source</th><th style="text-align:left;">Raw SYNOP</th></tr></thead>
+          <tbody id="synop"></tbody>
+        </table>
+        <div class="status-bar"><span id="synop-updated" style="color:var(--muted)">SYNOP last updated: --:--</span></div>
+      </div>
     </div>
 
   </div>
+
+  <!-- ═══ STATIONS DASHBOARD ═══ -->
+  <section id="stationsSection" class="stations-card hidden content-wrapper" aria-hidden="true">
+    <div class="stations-header">
+      <div>
+        <div class="stations-title">Stations Dashboard</div>
+        <div class="stations-sub">Live surface observations · Wind roses · Map view</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <span id="stationsLastFetched" style="color:var(--muted);font-size:11px;font-family:var(--mono);">Last fetched: —</span>
+        <button id="toggleMap" class="btn-primary" style="font-size:11px;height:30px;padding:6px 12px;">🗺 Map View</button>
+        <button id="backToMetar" class="btn-ghost">← Back to METAR</button>
+      </div>
+    </div>
+
+    <div id="stationsList" class="stations" aria-live="polite">
+      <div style="padding:20px;color:var(--muted);font-family:var(--cond);letter-spacing:1px;text-transform:uppercase;font-size:12px;">Loading stations…</div>
+    </div>
+
+    <div class="summary">
+      <div class="pill">Total: <span id="totalCount">0</span></div>
+      <div class="pill">Alerts: <span id="alertCount">0</span></div>
+      <div class="pill">Stale: <span id="staleCount">0</span></div>
+      <div class="pill">Most recent: <span id="mostRecent">—</span></div>
+    </div>
+
+    <div id="stationsMapCard" class="hidden" style="margin-top:14px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
+        <div style="display:flex;gap:10px;align-items:center;">
+          <input id="mapSearch" type="text" class="map-search" placeholder="Filter stations on map…"/>
+          <span style="color:var(--muted);font-family:var(--mono);font-size:11px;" id="mapLastFetched">Last fetched: —</span>
+        </div>
+        <div class="legend" id="mapLegend">
+          <div class="row"><div class="dot ok"></div><span>OK</span></div>
+          <div class="row"><div class="dot warn"></div><span>Alert</span></div>
+          <div class="row"><div class="dot danger"></div><span>Critical</span></div>
+          <div class="row"><div class="dot error"></div><span>Date mismatch</span></div>
+        </div>
+      </div>
+      <div class="map-container"><div id="map"></div></div>
+    </div>
+  </section>
 
   <!-- ═══ FOOTER ═══ -->
   <div class="footer" role="contentinfo">
@@ -553,24 +805,6 @@ function tickClocks(){
 tickClocks();
 setInterval(tickClocks,1000);
 
-/* ── TABS ── */
-document.querySelectorAll('.tab-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const panel = btn.dataset.panel;
-    document.querySelectorAll('.tab-btn').forEach(b => {
-      b.classList.remove('active');
-      b.setAttribute('aria-selected','false');
-    });
-    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-    btn.classList.add('active');
-    btn.setAttribute('aria-selected','true');
-    const panelEl = document.getElementById('panel-' + panel);
-    if(panelEl) panelEl.classList.add('active');
-    // If switching to stations, load data
-    if(panel === 'stations') fetchStationsData();
-  });
-});
-
 /* ── AUDIO ── */
 function playBeep(){
   if(mute) return;
@@ -599,6 +833,11 @@ function playCriticalAlarm(){
     setTimeout(()=>{o1.stop();o2.stop();ctx.close();},700);
   }catch(e){}
 }
+/* Special alarm — TNCA gust ≥35kt AND TS/TSRA present. Sounds the critical alarm TWICE. */
+function playSpecialAlarm(){
+  playCriticalAlarm();
+  setTimeout(()=>{playCriticalAlarm();},850);
+}
 
 /* ── FETCH ── */
 async function fetchWithTimeout(url,timeout=REQUEST_TIMEOUT_MS,opts={}){
@@ -623,9 +862,7 @@ async function fetchWithRetries(url,attempts=MAX_RETRIES){
   return{ok:false,error:lastErr?String(lastErr):'fetch failed'};
 }
 
-/* ── KNMI VISIBILITY
-   Thresholds: ≥10 000 m → green | 5 000–9 999 m → amber | < 5 000 m → red
-── */
+/* ── KNMI VISIBILITY ── */
 function extractKnmiBonaireVisibility(text){
   if(!text||!text.trim())return null;
   const s=String(text).replace(/\u00A0/g,' ').replace(/\s+/g,' ');
@@ -637,29 +874,24 @@ function extractKnmiBonaireVisibility(text){
   if(allNums.length){allNums.sort((a,b)=>b.length-a.length||a.localeCompare(b));return`${allNums[0]} m`;}
   return null;
 }
-
+/* Vis colour thresholds (metres):
+   > 10000 → green   6000–9999 → amber   ≤ 5000 → red */
 function applyVisColor(meters){
-  const DOT=visStatusEl, VAL=visValueEl;
-  DOT.classList.remove('low','mid');
-  if(isNaN(meters)){
-    DOT.style.background='';DOT.style.boxShadow='';
-    VAL.style.color='';return;
-  }
-  let col,shadow;
-  if(meters>=10000){
-    // GREEN — ≥ 10 km
-    col='var(--ok)';shadow='0 0 0 3px var(--ok-dim),0 0 8px var(--ok)';
-  } else if(meters>=5000){
-    // AMBER — 5–10 km
-    col='var(--warn)';shadow='0 0 0 3px rgba(245,158,11,0.15),0 0 8px var(--warn)';
-    DOT.classList.add('mid');
+  const DOT=visStatusEl, widget=document.getElementById('bonaire-vis-widget');
+  DOT.classList.remove('low');
+  DOT.removeAttribute('style');
+  if(isNaN(meters)) return;
+  if(meters>10000){
+    DOT.style.cssText='background:#3fcf82;box-shadow:0 0 0 3px rgba(63,207,130,0.15),0 0 8px #3fcf82;';
+    if(widget)widget.style.boxShadow='var(--shadow),0 0 0 1.5px rgba(63,207,130,0.4)';
+  } else if(meters>=6000){
+    DOT.style.cssText='background:#f59e0b;box-shadow:0 0 0 3px rgba(245,158,11,0.18),0 0 8px #f59e0b;';
+    if(widget)widget.style.boxShadow='var(--shadow),0 0 0 1.5px rgba(245,158,11,0.5)';
   } else {
-    // RED — < 5 km
-    col='var(--alert)';shadow='0 0 0 3px var(--alert-dim),0 0 8px var(--alert)';
     DOT.classList.add('low');
+    DOT.style.cssText='background:#ff5f5f;box-shadow:0 0 0 3px rgba(255,95,95,0.18),0 0 8px #ff5f5f;';
+    if(widget)widget.style.boxShadow='var(--shadow),0 0 0 1.5px rgba(255,95,95,0.55)';
   }
-  DOT.style.background=col;DOT.style.boxShadow=shadow;
-  VAL.style.color=col;
 }
 
 async function updateVisFromKnmi(){
@@ -667,7 +899,7 @@ async function updateVisFromKnmi(){
     const out=await fetchWithRetries(KNMI_BONAIRE_URL,MAX_RETRIES);
     if(!out||!out.ok||!out.text){
       visValueEl.textContent='—';visValueEl.style.color='';
-      visStatusEl.classList.remove('low','mid');visStatusEl.style.background='';visStatusEl.style.boxShadow='';
+      visStatusEl.classList.remove('low');visStatusEl.style.background='';visStatusEl.style.boxShadow='';
       visTsEl.style.display='none';return;
     }
     const rawVis=extractKnmiBonaireVisibility(String(out.text||''));
@@ -680,18 +912,19 @@ async function updateVisFromKnmi(){
         visValueEl.innerHTML=`<span style="font-size:1.7rem">${rawVis.replace(' m','')}</span><span class="vis-unit"> m</span>`;
       }
       applyVisColor(meters);
+      // re-apply colour to the inner span after innerHTML set
       const inner=visValueEl.querySelector('span');if(inner)inner.style.color='inherit';
       const local=formatLocalDateTimeParts();
       if(visTsEl){visTsEl.textContent=`Updated ${local.date} ${local.time}`;visTsEl.style.display='block';}
     } else {
       visValueEl.textContent='—';visValueEl.style.color='';
-      visStatusEl.classList.remove('low','mid');visStatusEl.style.background='';visStatusEl.style.boxShadow='';
+      visStatusEl.classList.remove('low');visStatusEl.style.background='';visStatusEl.style.boxShadow='';
       if(visTsEl){visTsEl.textContent='Not found in response';visTsEl.style.display='block';}
     }
   }catch(e){
     console.error('updateVisFromKnmi error',e);
     visValueEl.textContent='—';visValueEl.style.color='';
-    visStatusEl.classList.remove('low','mid');visStatusEl.style.background='';visStatusEl.style.boxShadow='';
+    visStatusEl.classList.remove('low');visStatusEl.style.background='';visStatusEl.style.boxShadow='';
     visTsEl.style.display='none';
   }
 }
@@ -700,7 +933,8 @@ async function updateVisFromKnmi(){
 function cleanForParse(s){if(!s)return'';return String(s).replace(/\sRMK[\s\S]*/i,'').replace(/\s(?:TEMPO|BECMG|PROB\d{2}|FM\d{6})[\s\S]*/i,'').replace(/\bAUTO\b|\bCOR\b/gi,'').trim();}
 function parseMetar(raw){
   const cleaned=cleanForParse(raw),tokens=cleaned.split(/\s+/);
-  const time=tokens[1]||'--';
+  // Find time by pattern ddhhmmZ — not by position (fixes TNCB etc.)
+  const time=tokens.find(x=>/^\d{6}Z$/.test(x))||tokens[1]||'--';
   const windBase=tokens.find(x=>/^(?:VRB|\d{3})\d{2}(?:G\d{2,3})?KT$/.test(x))||'/////KT';
   const varDir=tokens.find(x=>/^\d{3}V\d{3}$/.test(x));
   const wind=varDir?`${windBase} ${varDir}`:windBase;
@@ -736,21 +970,34 @@ function setWxCritical(cell,wxText){
 }
 function isCloudGroupWithCbTcu(s){if(!s)return false;return/(?:FEW|SCT|BKN|OVC)\d{3}(?:CB|TCU)/i.test(s);}
 
+/* ── STATION METADATA ── */
+const STATION_FLAGS={'TNCA':'🇦🇼','TNCB':'🇧🇶','TNCC':'🇨🇼','TNCM':'🇸🇽','SVMI':'🇻🇪','SVVA':'🇻🇪'};
+const STATION_NAMES={'TNCA':'Aruba','TNCB':'Bonaire','TNCC':'Curaçao','TNCM':'Sint Maarten','SVMI':'Caracas','SVVA':'Valencia'};
+
 /* ── BUILD METAR TABLE ── */
 function buildMetarTable(){
   metarTbody.innerHTML='';
   STATIONS.forEach(icao=>{
-    metarState[icao]=metarState[icao]||{lastTime:null,lastRaw:null,pastRaw:null,row:null,rawEl:null,pastEl:null,highlightTimeout:null,stats:{winds:[],temps:[],vis:[],wxSummary:''}};
+    metarState[icao]=metarState[icao]||{lastTime:null,lastRaw:null,pastRaw:null,row:null,rawRow:null,rawEl:null,pastEl:null,highlightTimeout:null,stats:{winds:[],temps:[],vis:[],wxSummary:''}};
     const tr=document.createElement('tr');
+    tr.className='data-row';
     const rr=document.createElement('tr');
-    rr.className='raw';
-    tr.innerHTML=`<td class="station">${icao}</td><td class="time">--</td><td class="wind">--</td><td>--</td><td class="wx">--</td><td class="clouds">--</td><td>--</td><td>--</td>`;
+    rr.className='raw hidden-row';
+    const flag=STATION_FLAGS[icao]||'';
+    const name=STATION_NAMES[icao]||'';
+    tr.innerHTML=`<td class="station"><span class="flag">${flag}</span><span class="icao-code">${icao}</span><span class="station-sub">${name}</span></td><td class="time">--</td><td class="wind">--</td><td class="vis-cell">--</td><td class="wx">--</td><td class="clouds">--</td><td class="td-cell">--</td><td class="qnh-cell">--</td>`;
     rr.innerHTML=`<td colspan="8"><span class="raw-current"></span><span class="raw-past"></span></td>`;
     metarTbody.appendChild(tr);
     metarTbody.appendChild(rr);
     metarState[icao].row=tr;
+    metarState[icao].rawRow=rr;
     metarState[icao].rawEl=rr.querySelector('.raw-current');
     metarState[icao].pastEl=rr.querySelector('.raw-past');
+    tr.addEventListener('click',()=>{
+      const isOpen=!rr.classList.contains('hidden-row');
+      if(isOpen){rr.classList.add('hidden-row');tr.classList.remove('raw-open');}
+      else{rr.classList.remove('hidden-row');tr.classList.add('raw-open');}
+    });
   });
 }
 buildMetarTable();
@@ -787,7 +1034,10 @@ function renderMetar(icao,raw){
     const state=metarState[icao];
     if(!state||!state.row)return false;
     const tds=state.row.querySelectorAll('td');
-    [2,3,4,5].forEach(i=>{tds[i].classList.remove('alert','cloud-critical','wx-critical');});
+    // Clear all dynamic classes
+    const dynClasses='alert cloud-critical wx-critical wx-present wx-heavy wind-calm wind-light wind-moderate wind-strong wind-gust vis-good vis-reduced vis-poor vis-fog cld-few cld-sct cld-bkn cld-ovc qnh-low age-warn age-stale'.split(' ');
+    tds.forEach(td=>dynClasses.forEach(c=>td.classList.remove(c)));
+    tds[2].className='wind';tds[3].className='vis-cell';tds[4].className='wx';tds[5].className='clouds';tds[7].className='qnh-cell';
     state.row.classList.toggle('stale',parsed.age>120);
     if(state.lastRaw&&state.lastRaw!==metarLine)state.pastRaw=state.lastRaw;
     state.lastRaw=metarLine;
@@ -813,11 +1063,40 @@ function renderMetar(icao,raw){
       if(state.pastRaw){state.pastEl.style.display='block';state.pastEl.textContent=`Previous: ${state.pastRaw}`;}
       else{state.pastEl.style.display='none';state.pastEl.textContent='';}
     }
-    const hasGustToken=/G\d{2,3}KT/i.test(parsed.windBase);
-    const gustValue=parsed.gust||0;
+    // ── Time age border ──
+    tds[1].className='time';
+    if(parsed.age>=120)tds[1].classList.add('age-stale');
+    else if(parsed.age>=60)tds[1].classList.add('age-warn');
+    // ── Wind border ──
     const windSpeed=extractWindSpeedFromWindBase(parsed.windBase);
+    const gustValue=parsed.gust||0;
+    const hasGustToken=/G\d{2,3}KT/i.test(parsed.windBase);
     const windHasGust=hasGustToken||gustValue>0;
-    const tsPresent=/\b(?:VCTS|VCSH|TS|TSRA)\b/i.test(parsed.wx);
+    if(windHasGust||windSpeed>=35)tds[2].classList.add('wind-gust');
+    else if(windSpeed>=25)tds[2].classList.add('wind-strong');
+    else if(windSpeed>=15)tds[2].classList.add('wind-moderate');
+    // ── Vis border ──
+    if(!isNaN(parsed.visMin)){
+      if(parsed.visMin<1000)tds[3].classList.add('vis-fog');
+      else if(parsed.visMin<3000)tds[3].classList.add('vis-poor');
+      else if(parsed.visMin<8000)tds[3].classList.add('vis-reduced');
+    }
+    // ── WX border ──
+    if(parsed.wx!=='--'&&parsed.wx.trim()){
+      const isHeavy=/(\+|\bTS\b|\bTSRA\b|\bVCTS\b)/.test(parsed.wx);
+      tds[4].classList.add(isHeavy?'wx-heavy':'wx-present');
+    }
+    // ── Clouds border ──
+    if(parsed.cld!=='--'){
+      const cu=parsed.cld.toUpperCase();
+      if(/OVC/.test(cu))tds[5].classList.add('cld-ovc');
+      else if(/BKN/.test(cu))tds[5].classList.add('cld-bkn');
+      else if(/SCT/.test(cu))tds[5].classList.add('cld-sct');
+    }
+    // ── QNH border ──
+    if(parsed.qnh&&parsed.qnh!=='—'){const hPa=parseInt(parsed.qnh,10);if(!isNaN(hPa)&&hPa<1000)tds[7].classList.add('qnh-low');}
+
+    const tsPresent=/\b(?:TS|TSRA|VCTS)\b/i.test(parsed.wx);
     const cloudFlag=isCloudGroupWithCbTcu(parsed.cld);
     const wxCritical=setWxCritical(tds[4],parsed.wx);
     if(isNew){playBeep();markTimeUpdated(icao);}
@@ -825,11 +1104,11 @@ function renderMetar(icao,raw){
     if(!isNaN(parsed.visMin)&&parsed.visMin<=5000)tds[3].classList.add('alert');
     if(wxCritical)tds[4].classList.add('alert');
     if(cloudFlag)tds[5].classList.add('cloud-critical');
-    const criticalForThisStation=(icao==='TNCA'&&gustValue>=35);
-    const criticalGlobal=tsPresent;
-    if(isNew&&(criticalForThisStation||criticalGlobal))playCriticalAlarm();
+    // ── SPECIAL ALARM ── only TNCA, gust ≥35kt, AND TS/TSRA present. Sounds twice.
+    const isSpecialAlarmCondition=(icao==='TNCA'&&gustValue>=35&&tsPresent);
+    if(isNew&&isSpecialAlarmCondition)playSpecialAlarm();
     if(typeof windSpeed==='number'){state.stats.winds.push(windSpeed);if(state.stats.winds.length>200)state.stats.winds.shift();}
-    if(parsed.td&&typeof parsed.td==='string'){const m=parsed.td.match(/^(M?)(\d{1,2})\/(M?)(\d{1,2})$/);if(m){const sign=m[1]==='M'?-1:1;const tempVal=sign*parseInt(m[2],10);state.stats.temps.push(tempVal);if(state.stats.temps.length>200)state.stats.temps.shift();}}
+    if(parsed.td&&typeof parsed.td==='string'){const m=parsed.td.match(/^(M?)(\d{1,2})\/(M?)(\d{1,2})$/);if(m){const sign=m[1]==='M'?-1:1;state.stats.temps.push(sign*parseInt(m[2],10));if(state.stats.temps.length>200)state.stats.temps.shift();}}
     if(!isNaN(parsed.visMin)){state.stats.vis.push(parsed.visMin);if(state.stats.vis.length>200)state.stats.vis.shift();}
     return true;
   }catch(e){console.error('renderMetar error',icao,e);return false;}
@@ -862,28 +1141,50 @@ async function refreshAllMetars(){
 }
 
 /* ── TAF PARSING ── */
+
+/** Parse a single TAF segment string into METAR-like columns. */
 function parseTafSegment(segStr, fullText){
   const tokens=segStr.trim().split(/\s+/);
+
+  // Wind
   const windBase=tokens.find(x=>/^(?:VRB|\d{3})\d{2}(?:G\d{2,3})?KT$/.test(x))||'--';
   const varDir=tokens.find(x=>/^\d{3}V\d{3}$/.test(x));
   const wind=windBase==='--'?'--':(varDir?`${windBase} ${varDir}`:windBase);
+
+  // Vis
   const visTokens=tokens.filter(x=>/^\d{4}(?:[NSEW]{1,2})?$/.test(x)||x==='9999'||/^P\d+SM$/.test(x));
   const vis=visTokens.length?visTokens[0]:'--';
   const visNum=vis==='9999'||/^P/.test(vis)?9999:(parseInt(vis,10)||NaN);
+
+  // Wx
   const wx=tokens.filter(x=>/^(?:\+|-)?(?:VC)?(?:TS|VCTS|VCSH|TSRA|SH|SHRA|RA|DZ|SN|FG|BR|HZ|SQ|PO)/.test(x)).join(' ')||'--';
+
+  // Cloud
   const cldMatch=segStr.match(/((?:FEW|SCT|BKN|OVC)(?:\d{3}|\/{3})(?:TCU|CB)?)/gi)||[];
   const cld=cldMatch.join(' ')||'--';
+
+  // QNH
   const qp=tokens.find(x=>/^Q\d{4}$/.test(x))||null;
   let qnh='—';
   if(qp){const h=qp.slice(1);const inches=(parseInt(h,10)*0.029529983071445).toFixed(2);qnh=`${h} / ${inches}`;}
+
   return{wind,windBase,vis,visNum,wx,cld,qnh};
 }
 
+/**
+ * Parse a full TAF text into a base record + array of change groups.
+ * Returns: { valid, td, base, changes[], rawFull }
+ * Each change: { type, label, period, wind, windBase, vis, visNum, wx, cld, qnh }
+ */
 function parseTaf(rawText){
   if(!rawText)return null;
   const full=rawText.replace(/\r?\n/g,' ').replace(/\s{2,}/g,' ').trim();
+
+  // Valid period
   const validMatch=full.match(/\b(\d{4}\/\d{4})\b/);
   const valid=validMatch?validMatch[1]:'--';
+
+  // TX/TN temps (global in TAF)
   const tempMatches=[...full.matchAll(/T([XN])(M?\d{2})\/\d{4}Z/gi)];
   let tMax=null,tMin=null;
   for(const m of tempMatches){
@@ -896,28 +1197,40 @@ function parseTaf(rawText){
   if(tMax!==null&&tMin!==null)td=`${tMax}°/${tMin}°`;
   else if(tMax!==null)td=`TX ${tMax}°`;
   else if(tMin!==null)td=`TN ${tMin}°`;
+
+  // Split into segments on TEMPO / BECMG / PROB / FM keywords
   const CHANGE_RE=/\b(TEMPO|BECMG|PROB\d{2}(?:\s+TEMPO)?|FM\d{6})\b/g;
   const splitPoints=[];
   let m2;
-  while((m2=CHANGE_RE.exec(full))!==null){splitPoints.push({idx:m2.index,keyword:m2[1]});}
+  while((m2=CHANGE_RE.exec(full))!==null){
+    splitPoints.push({idx:m2.index,keyword:m2[1]});
+  }
+
+  // Base = everything before first change keyword
   const baseEnd=splitPoints.length?splitPoints[0].idx:full.length;
   const baseStr=full.slice(0,baseEnd);
   const base=parseTafSegment(baseStr,full);
+
+  // Change groups
   const changes=[];
   for(let i=0;i<splitPoints.length;i++){
     const {idx,keyword}=splitPoints[i];
     const segEnd=i+1<splitPoints.length?splitPoints[i+1].idx:full.length;
     const segBody=full.slice(idx+keyword.length,segEnd).trim();
     const seg=parseTafSegment(segBody,full);
+
     let type='TEMPO',label=keyword;
     if(/^FM/.test(keyword)){type='FM';const hhmm=keyword.slice(4,8);label=`FM ${hhmm.slice(0,2)}:${hhmm.slice(2)}`;}
     else if(/^BECMG/.test(keyword)){type='BECMG';label='BECMG';}
     else if(/^PROB\d{2}\s+TEMPO/.test(keyword)){type='TEMPO';label=keyword;}
     else if(/^PROB\d{2}/.test(keyword)){type='PROB';label=keyword;}
+
     const periodMatch=segBody.match(/^(\d{4}\/\d{4})/);
     const period=periodMatch?periodMatch[1]:'';
+
     changes.push({type,label,period,...seg});
   }
+
   return{valid,td,base,changes,rawFull:full};
 }
 
@@ -936,7 +1249,7 @@ function sanitizeTextForDisplay(text){
 }
 
 /* ── BUILD TAF TABLE ── */
-const TAF_ICAOS = STATIONS.slice(0,3);
+const TAF_ICAOS = STATIONS.slice(0,3); // TNCA, TNCB, TNCC
 
 function buildTafTable(){
   tafTbody.innerHTML='';
@@ -944,7 +1257,9 @@ function buildTafTable(){
     const tr=document.createElement('tr');
     tr.dataset.icao=icao;
     tr.dataset.tafBase='1';
-    tr.innerHTML=`<td class="station">${icao}</td><td class="time">--</td><td class="wind">--</td><td>--</td><td class="wx">--</td><td class="clouds">--</td><td>--</td><td>--</td>`;
+    const flag=STATION_FLAGS[icao]||'';
+    const name=STATION_NAMES[icao]||'';
+    tr.innerHTML=`<td class="station"><span class="flag">${flag}</span><span class="icao-code">${icao}</span><span class="station-sub">${name}</span></td><td class="time">--</td><td class="wind">--</td><td>--</td><td class="wx">--</td><td class="clouds">--</td><td>--</td><td>--</td>`;
     const rr=document.createElement('tr');
     rr.className='taf-raw-row';
     rr.dataset.icao=icao;
@@ -955,6 +1270,7 @@ function buildTafTable(){
 }
 buildTafTable();
 
+/** Apply alert classes to a set of 8 tds based on parsed segment fields */
 function applyTafAlerts(tds, seg){
   [2,3,4,5].forEach(i=>tds[i].classList.remove('alert','cloud-critical','wx-critical'));
   if(seg.windBase!=='--'&&/G\d{2,3}KT/i.test(seg.windBase))tds[2].classList.add('alert');
@@ -969,6 +1285,8 @@ function renderTafRow(icao, rawText){
   const clean=sanitizeTextForDisplay(rawText);
   const parsed=parseTaf(clean);
   if(!parsed)return;
+
+  // ── BASE ROW ──
   const tr=tafTbody.querySelector(`tr[data-taf-base][data-icao="${icao}"]`);
   if(!tr)return;
   const tds=tr.querySelectorAll('td');
@@ -980,9 +1298,15 @@ function renderTafRow(icao, rawText){
   tds[6].textContent=parsed.td;
   tds[7].textContent=parsed.base.qnh;
   applyTafAlerts(tds, parsed.base);
+
+  // ── RAW ROW ──
   const rr=tafTbody.querySelector(`tr.taf-raw-row[data-icao="${icao}"]`);
   if(rr){const span=rr.querySelector('.taf-raw-text');if(span)span.textContent=parsed.rawFull;}
+
+  // ── REMOVE OLD CHANGE SUB-ROWS for this icao ──
   tafTbody.querySelectorAll(`tr.taf-change-row[data-icao="${icao}"]`).forEach(r=>r.remove());
+
+  // ── INSERT CHANGE ROWS before the raw row ──
   const insertBefore=rr||null;
   parsed.changes.forEach(ch=>{
     const cr=document.createElement('tr');
@@ -1017,200 +1341,58 @@ async function loadTafRow(icao){
 async function loadAllTafs(){await Promise.all(TAF_ICAOS.map(i=>loadTafRow(i)));}
 
 /* ── SYNOP ── */
+function colorizeSynop(text){
+  if(!text)return'';
+  const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  return text.split('\n').map(line=>{
+    let s=esc(line);
+    // Section separators
+    s=s.replace(/\b(333|444|555|222)\b/g,'<span class="tok-section">$1</span>');
+    // Wind groups (dddff or dddffGff with KT/MPS)
+    s=s.replace(/\b(\d{3}|\/{3})(\d{2,3})(G\d{2,3})?(KT|MPS)\b/g,'<span class="tok-wind">$&</span>');
+    // Temperature groups (1sTTT or 2sTTT)
+    s=s.replace(/\b([12][01]\d{3})\b/g,'<span class="tok-temp">$&</span>');
+    // Pressure groups (3PPPP or 4PPPP)
+    s=s.replace(/\b([34]\d{4})\b/g,'<span class="tok-pressure">$&</span>');
+    // Vis (4-digit standalone)
+    s=s.replace(/(?<![>\w])(\d{4})(?!\d|[<])/g,'<span class="tok-vis">$1</span>');
+    // 5-digit WMO station number at start of observation
+    s=s.replace(/\b(\d{5})\b/g,'<span class="tok-station">$1</span>');
+    return s;
+  }).join('\n');
+}
+
 function buildSynopTable(){
   synopTbody.innerHTML='';
-  const sources=['TNCA SINU50','TNCA SMNU50','TNCC SI','TNCC SM'];
-  sources.forEach((name,i)=>{
+  const SYNOP_SOURCES=[
+    {label:'TNCA',sub:'SINU50',flag:'🇦🇼'},
+    {label:'TNCA',sub:'SMNU50',flag:'🇦🇼'},
+    {label:'TNCC',sub:'SICA20',flag:'🇨🇼'},
+    {label:'TNCC',sub:'SMCA01',flag:'🇨🇼'}
+  ];
+  SYNOP_SOURCES.forEach((s,i)=>{
     const tr=document.createElement('tr');
     tr.dataset.idx=String(i);
-    tr.innerHTML=`<td class="station">${name}</td><td><div class="synop-raw"></div></td>`;
+    tr.innerHTML=`<td class="station"><span class="flag">${s.flag}</span><span class="icao-code">${s.label}</span><span class="station-sub">${s.sub}</span></td><td><div class="synop-raw"></div></td>`;
     synopTbody.appendChild(tr);
   });
 }
 buildSynopTable();
-
-function escapeHtml(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
-
-/* ── SYNOP DECODER ── */
-function decodeSynop(synopStr){
-  const tokens=synopStr.trim().split(/\s+/);
-  const result={
-    raw:synopStr,
-    datetime:'—',
-    station:'—',
-    wind_direction:'—',
-    wind_speed:'—',
-    visibility:'—',
-    weather:'—',
-    cloud_cover:'—',
-    temp:'—',
-    dew_point:'—',
-    pressure:'—',
-    sea_level_pressure:'—',
-    trend:'—'
-  };
-
-  // 1st group: datetime (12 digits like 202605101800)
-  if(tokens[0]&&/^\d{12}$/.test(tokens[0])){
-    const dt=tokens[0];
-    result.datetime=`${dt.slice(0,4)}-${dt.slice(4,6)}-${dt.slice(6,8)} ${dt.slice(8,10)}:${dt.slice(10,12)}Z`;
-  }
-
-  // Find AAXX or similar header
-  const headerIdx=tokens.findIndex(t=>/^[A-Z]{4}/.test(t));
-  if(headerIdx===-1)return result;
-
-  // 3rd group (IIiii): station type and location
-  if(tokens[headerIdx+1]&&/^\d{5}$/.test(tokens[headerIdx+1])){
-    const group=tokens[headerIdx+1];
-    const lat=parseInt(group.slice(1,3));
-    const lon=parseInt(group.slice(3,5));
-    result.station=`${lat}°N ${lon}°W`;
-  }
-
-  // 4th group (ddff): wind direction and speed
-  if(tokens[headerIdx+2]&&/^\d{4,5}$/.test(tokens[headerIdx+2])){
-    const group=tokens[headerIdx+2];
-    let dd,ff;
-    if(group.length===5&&group[0]==='0'){
-      dd=parseInt(group.slice(1,3))*10;ff=parseInt(group.slice(3,5));
-    }else if(group.length===4){
-      dd=parseInt(group.slice(0,2))*10;ff=parseInt(group.slice(2,4));
-    }
-    if(!isNaN(dd)&&!isNaN(ff)){
-      const dirs=['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
-      const dirIdx=Math.round(dd/22.5)%16;
-      result.wind_direction=dirs[dirIdx];
-      result.wind_speed=ff+' kt';
-    }
-  }
-
-  // 5th group (VVhh): visibility
-  if(tokens[headerIdx+3]&&/^\d{4,5}$/.test(tokens[headerIdx+3])){
-    const group=tokens[headerIdx+3];
-    const vv=parseInt(group.slice(0,2));
-    let visKm='—';
-    if(vv===90)visKm='≥40 km';
-    else if(vv<90)visKm=Math.pow(10,(vv/50)).toFixed(1)+' km';
-    result.visibility=visKm;
-  }
-
-  // 6th group (Nddff): cloud cover
-  if(tokens[headerIdx+4]){
-    const group=tokens[headerIdx+4];
-    if(/^[0-9]/.test(group)){
-      const n=parseInt(group[0]);
-      const cloudMap=['SKC','FEW','FEW','SCT','SCT','BKN','BKN','BKN','OVC','OVC'];
-      result.cloud_cover=cloudMap[n]||'—';
-    }
-  }
-
-  // 7th group (TT/Td): temperature and dew point
-  if(tokens[headerIdx+5]&&/^(M|[0-9])\d{2}\/(M|[0-9])\d{2}$/.test(tokens[headerIdx+5])){
-    const group=tokens[headerIdx+5];
-    const parts=group.split('/');
-    const t=parseInt(parts[0].replace('M','-'));
-    const td=parseInt(parts[1].replace('M','-'));
-    if(!isNaN(t))result.temp=t+'°C';
-    if(!isNaN(td))result.dew_point=td+'°C';
-  }
-
-  // 8th group (PPPP): pressure
-  if(tokens[headerIdx+6]&&/^\d{4}$/.test(tokens[headerIdx+6])){
-    const pp=parseInt(tokens[headerIdx+6]);
-    const hpa=(pp>5000?10000-pp:pp+1000)/10;
-    result.pressure=hpa.toFixed(1)+' hPa';
-  }
-
-  return result;
-}
 
 async function loadSynopRow(index,url){
   try{
     const out=await fetchWithRetries(url,MAX_RETRIES);
     if(out&&out.ok&&out.text){
       const row=synopTbody.querySelector(`tr[data-idx="${index}"]`);
-      if(row)row.querySelector('.synop-raw').textContent=sanitizeTextForDisplay(out.text);
+      if(row){
+        const div=row.querySelector('.synop-raw');
+        div.innerHTML=colorizeSynop(sanitizeTextForDisplay(out.text));
+      }
       const local=formatLocalDateTimeParts();
       if(synopUpdatedEl)synopUpdatedEl.textContent=`SYNOP last updated: ${local.date} ${local.time}`;
     }
   }catch(e){console.error('loadSynopRow error',index,e);}
 }
-
-async function loadSynopsFromOgimet(){
-  try{
-    const txtUrl='https://www.ogimet.com/ultimos_synops2.php?lang=en&estado=Cura&fmt=txt&Send=Send';
-    const proxyUrl='https://api.allorigins.win/get?url='+encodeURIComponent(txtUrl);
-    const res=await fetchWithTimeout(proxyUrl,REQUEST_TIMEOUT_MS);
-    if(!res||!res.ok)throw new Error('Proxy fetch failed');
-    const data=await res.json();
-    if(!data.contents)throw new Error('No content');
-    const text=data.contents;
-    const synopLines=text.split('\n').filter(line=>/^\d{12}\s+AAXX/.test(line.trim()));
-    
-    // Add decoded SYNOP as first row
-    if(synopLines.length>0){
-      const decoded=decodeSynop(synopLines[0]);
-      const tr=document.createElement('tr');
-      tr.innerHTML=`<td colspan="2" style="padding:0;border:none;">
-        <div style="background:linear-gradient(135deg,rgba(27,124,255,0.15),rgba(27,124,255,0.05));border:1px solid rgba(85,193,255,0.2);border-radius:10px;padding:18px;margin-bottom:12px;">
-          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;">
-            <div style="background:rgba(6,24,42,0.6);border:1px solid rgba(85,193,255,0.15);border-radius:8px;padding:12px;">
-              <div style="font-family:var(--cond);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">DateTime</div>
-              <div style="font-family:var(--mono);font-size:15px;color:#55c1ff;font-weight:700;">${escaped(decoded.datetime)}</div>
-            </div>
-            <div style="background:rgba(6,24,42,0.6);border:1px solid rgba(85,193,255,0.15);border-radius:8px;padding:12px;">
-              <div style="font-family:var(--cond);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Location</div>
-              <div style="font-family:var(--cond);font-size:14px;color:#fff;font-weight:700;">${escaped(decoded.station)}</div>
-            </div>
-            <div style="background:rgba(6,24,42,0.6);border:1px solid rgba(85,193,255,0.15);border-radius:8px;padding:12px;">
-              <div style="font-family:var(--cond);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Wind</div>
-              <div style="font-family:var(--cond);font-size:14px;color:#fff;font-weight:700;">${escaped(decoded.wind_direction)} ${escaped(decoded.wind_speed)}</div>
-            </div>
-            <div style="background:rgba(6,24,42,0.6);border:1px solid rgba(85,193,255,0.15);border-radius:8px;padding:12px;">
-              <div style="font-family:var(--cond);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Visibility</div>
-              <div style="font-family:var(--cond);font-size:14px;color:#fff;font-weight:700;">${escaped(decoded.visibility)}</div>
-            </div>
-            <div style="background:rgba(6,24,42,0.6);border:1px solid rgba(85,193,255,0.15);border-radius:8px;padding:12px;">
-              <div style="font-family:var(--cond);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Cloud Cover</div>
-              <div style="font-family:var(--cond);font-size:14px;color:#fff;font-weight:700;">${escaped(decoded.cloud_cover)}</div>
-            </div>
-            <div style="background:rgba(6,24,42,0.6);border:1px solid rgba(85,193,255,0.15);border-radius:8px;padding:12px;">
-              <div style="font-family:var(--cond);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Temp / Dew</div>
-              <div style="font-family:var(--cond);font-size:14px;color:#fff;font-weight:700;">${escaped(decoded.temp)} / ${escaped(decoded.dew_point)}</div>
-            </div>
-            <div style="background:rgba(6,24,42,0.6);border:1px solid rgba(85,193,255,0.15);border-radius:8px;padding:12px;">
-              <div style="font-family:var(--cond);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Pressure</div>
-              <div style="font-family:var(--cond);font-size:14px;color:#fff;font-weight:700;">${escaped(decoded.pressure)}</div>
-            </div>
-          </div>
-          <div style="margin-top:12px;padding:10px;background:rgba(4,16,28,0.5);border-radius:6px;border-left:3px solid rgba(85,193,255,0.3);">
-            <div style="font-family:var(--mono);font-size:11px;color:rgba(200,225,255,0.75);word-break:break-all;line-height:1.6;">${escaped(decoded.raw)}</div>
-          </div>
-        </div>
-      </td>`;
-      synopTbody.appendChild(tr);
-    }
-    
-    // Add raw rows for additional reports
-    synopLines.slice(0,3).forEach(line=>{
-      const trimmed=line.trim();
-      if(!trimmed)return;
-      const tr=document.createElement('tr');
-      tr.innerHTML=`<td class="station" style="font-size:18px;letter-spacing:1px;">Curaçao<br><span style="font-size:11px;color:var(--muted);">Ogimet Raw</span></td><td><div class="synop-raw"></div></td>`;
-      tr.querySelector('.synop-raw').textContent=trimmed;
-      synopTbody.appendChild(tr);
-    });
-    
-    const local=formatLocalDateTimeParts();
-    if(synopUpdatedEl)synopUpdatedEl.textContent=`SYNOP last updated: ${local.date} ${local.time}`;
-  }catch(e){
-    console.error('loadSynopsFromOgimet error',e);
-  }
-}
-
-function escaped(s){return String(s||'—').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
-
 async function loadAllSynops(){
   const SYNOP_URLS=[
     'https://tgftp.nws.noaa.gov/data/raw/si/sinu50.tnca..txt',
@@ -1219,7 +1401,6 @@ async function loadAllSynops(){
     'https://tgftp.nws.noaa.gov/data/raw/sm/smca01.tncc..txt'
   ];
   await Promise.all(SYNOP_URLS.map((u,i)=>loadSynopRow(i,u)));
-  await loadSynopsFromOgimet();
 }
 
 /* ── TEST MODE ── */
@@ -1229,6 +1410,7 @@ const TEST_SAMPLES=[
   {'TNCA':'TNCA 152010Z 35020G40KT 0400 +TSRA FEW020CB BKN030 26/24 Q0980','TNCB':'TNCB 152010Z 09012G30KT 0500 -DZ SCT020 BKN040 24/22 Q1010','TNCC':'TNCC 152010Z 12045G60KT 0500 VCTS FEW020CB OVC025 27/25 Q1000','TNCM':'TNCM 152010Z 20015G35KT 0800 SHRA FEW020TCU BKN018 25/23 Q0995','SVMI':'SVMI 152010Z 30025G45KT 9999 VCTS FEW020CB BKN030 28/26 Q1002','SVVA':'SVVA 152010Z 04010G20KT 0300 -SHRA FEW020 BKN025 22/21 Q1008'},
   {'TNCA':'TNCA 152020Z 12010KT 9999 FEW020 SCT040 28/24 Q1013','TNCB':'TNCB 152020Z 08008KT 9999 FEW025 SCT050 26/22 Q1015','TNCC':'TNCC 152020Z 14012KT 9999 SCT030 BKN050 27/25 Q1008','TNCM':'TNCM 152020Z 18012KT 9999 FEW020 SCT040 26/24 Q1005','SVMI':'SVMI 152020Z 20015KT 9999 FEW020 SCT030 29/27 Q1009','SVVA':'SVVA 152020Z 06008KT 9999 FEW020 SCT040 24/22 Q1010'}
 ];
+
 const TAF_TEST_SAMPLES={
   'TNCA':'TAF TNCA 011730Z 0118/0218 35025G40KT 9999 FEW020CB TX31/0215Z TN24/0206Z TEMPO 0120/0124 35035G55KT 0500 +TSRA FEW013CB BKN020 BECMG 0202/0204 12015KT 9999 FEW025 FM020600 09010KT 9999 SCT030',
   'TNCB':'TAF TNCB 011730Z 0118/0218 34018G30KT 9999 SCT025 TX29/0214Z TN23/0207Z TEMPO 0119/0122 0400 +TSRA FEW018CB BKN025 PROB30 TEMPO 0122/0124 0800 SHRA SCT020 BECMG 0206/0208 09012KT 9999 FEW030',
@@ -1266,7 +1448,7 @@ document.getElementById('night-btn')?.addEventListener('click',()=>{
 });
 try{if(localStorage.getItem('rwc-night-mode')==='1'){document.documentElement.classList.add('night');const b=document.getElementById('night-btn');if(b){b.setAttribute('aria-pressed','true');b.textContent='☀ Day';b.style.color='#f59e0b';}}}catch(e){}
 
-/* Copy on click (METAR) */
+/* Copy on click */
 document.getElementById('metar')?.addEventListener('click',async e=>{
   const td=e.target.closest('td');
   if(!td)return;
@@ -1285,7 +1467,7 @@ document.getElementById('metar')?.addEventListener('click',async e=>{
   }
 });
 
-/* ── AUTO-REFRESH ── */
+/* ── INTERVALS ── */
 setInterval(()=>{if(!testMode)refreshAllMetars();},METAR_REFRESH_MS);
 setInterval(()=>{if(!testMode)updateVisFromKnmi();},VIS_REFRESH_MS);
 
@@ -1330,9 +1512,8 @@ function windRoseSvg(directionDeg,speed){
   const maxLen=27,len=sp?Math.min(maxLen,Math.max(6,(sp/20)*maxLen)):10;
   const arrowColor=sp>=25?'#ff5f5f':(sp>=15?'#f59e0b':'#3fcf82');
   const toDeg=(dir+180)%360;
-  const uid=Math.floor(Math.random()*99999);
   return`<svg viewBox="0 0 84 84" class="wind-rose">
-    <defs><marker id="arr${uid}" markerWidth="6" markerHeight="6" refX="0" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 z" fill="${arrowColor}"/></marker></defs>
+    <defs><marker id="arr${Math.floor(Math.random()*9999)}" markerWidth="6" markerHeight="6" refX="0" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 z" fill="${arrowColor}"/></marker></defs>
     <circle cx="42" cy="42" r="30" stroke="rgba(85,193,255,0.15)" stroke-width="1.5" fill="none"/>
     <circle cx="42" cy="42" r="2" stroke="rgba(85,193,255,0.2)" stroke-width="1" fill="none"/>
     <g transform="translate(42,42) rotate(${toDeg})">
@@ -1471,14 +1652,38 @@ el('mapSearch').addEventListener('input',()=>{
   addMarkersToMap(currentData.filter(r=>!q||(r.station&&r.station.toLowerCase().includes(q))));
 });
 
+/* ── SECTION SWITCHING ── */
+const metarSectionEl=document.getElementById('metarSection');
+const tafSectionEl=document.getElementById('tafSection');
+const synopSectionEl=document.getElementById('synopSection');
+const stationsSectionEl=document.getElementById('stationsSection');
+
+document.getElementById('switchToStations').addEventListener('click',()=>{
+  metarSectionEl?.classList.add('hidden');tafSectionEl?.classList.add('hidden');synopSectionEl?.classList.add('hidden');
+  stationsSectionEl?.classList.remove('hidden');stationsSectionEl?.setAttribute('aria-hidden','false');
+  fetchStationsData();
+});
+document.getElementById('backToMetar').addEventListener('click',()=>{
+  stationsSectionEl?.classList.add('hidden');stationsSectionEl?.setAttribute('aria-hidden','true');
+  metarSectionEl?.classList.remove('hidden');tafSectionEl?.classList.remove('hidden');synopSectionEl?.classList.remove('hidden');
+});
+
 /* ── INIT ── */
 (async function init(){
   try{
     buildMetarTable();buildTafTable();buildSynopTable();
     await Promise.allSettled([updateVisFromKnmi(),refreshAllMetars(),loadAllTafs(),loadAllSynops()]);
+    const anyData=STATIONS.some(icao=>metarState[icao]&&metarState[icao].lastRaw);
+    if(!anyData){
+      console.warn('No live METAR data — activating test mode.');
+      testMode=true;startTestRunner();
+      const b=document.getElementById('test-btn');if(b)b.textContent='⚗ Exit Test';
+    }
     fetchStationsData();
   }catch(e){
     console.error('initialization error',e);
+    testMode=true;startTestRunner();
+    const b=document.getElementById('test-btn');if(b)b.textContent='⚗ Exit Test';
   }
 })();
 
