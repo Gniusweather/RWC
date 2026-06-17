@@ -287,6 +287,77 @@ td.wx.wx-critical{color:var(--alert) !important;background:var(--alert-dim) !imp
 }
 .time-updated.dim{opacity:0.4 !important;}
 
+/* ── HISTORY / FORECAST EXPANDABLE PANEL ── */
+tr.data-row td.station{cursor:pointer;position:relative;padding-right:26px;}
+tr.data-row td.station:hover{background:rgba(85,193,255,0.06);}
+tr.data-row td.station::after{
+  content:'›';position:absolute;right:8px;top:50%;transform:translateY(-50%) rotate(90deg);
+  font-size:13px;color:var(--muted);transition:transform 0.25s ease;
+}
+tr.data-row.expanded td.station::after{transform:translateY(-50%) rotate(-90deg);color:var(--accent);}
+
+tr.history-row{display:none;}
+tr.history-row.open{display:table-row;}
+tr.history-row td{
+  background:rgba(3,12,22,0.85);padding:0;border-bottom:2px solid var(--border-bright);
+}
+.history-panel{padding:16px 20px;display:flex;flex-direction:column;gap:14px;}
+.history-panel-header{
+  display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;
+}
+.history-panel-title{
+  font-family:var(--cond);font-size:13px;font-weight:700;letter-spacing:1.5px;
+  text-transform:uppercase;color:var(--accent);
+}
+.history-panel-sub{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:0.5px;}
+
+.history-table-wrap{overflow-x:auto;border-radius:8px;border:1px solid var(--border);}
+table.history-table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:12px;}
+table.history-table th{
+  background:rgba(8,30,56,0.8);color:var(--muted);font-weight:700;font-size:9px;
+  text-transform:uppercase;letter-spacing:1.2px;padding:7px 10px;text-align:center;
+  border-bottom:1px solid var(--border);white-space:nowrap;
+}
+table.history-table td{
+  padding:7px 10px;text-align:center;color:#ffffff;font-size:12px;
+  border-bottom:1px solid rgba(32,52,80,0.35);white-space:nowrap;
+}
+table.history-table tr:last-child td{border-bottom:none;}
+table.history-table tr:first-child td{background:rgba(85,193,255,0.06);font-weight:700;}
+table.history-table td.h-time{color:var(--accent);font-weight:700;text-align:left;padding-left:14px;}
+
+.history-empty{
+  padding:14px;text-align:center;color:var(--muted);font-family:var(--cond);
+  font-size:12px;letter-spacing:0.5px;background:rgba(255,255,255,0.02);border-radius:8px;
+}
+.history-loading{
+  padding:14px;text-align:center;color:var(--muted);font-family:var(--cond);
+  font-size:12px;letter-spacing:1px;text-transform:uppercase;
+}
+
+/* Forecast mini-panel */
+.forecast-box{
+  border-radius:10px;border:1px solid var(--border-bright);
+  background:linear-gradient(135deg,rgba(27,124,255,0.06),rgba(85,193,255,0.02));
+  padding:12px 16px;display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap;
+}
+.forecast-icon{font-size:28px;line-height:1;flex-shrink:0;margin-top:2px;}
+.forecast-body{flex:1;min-width:200px;}
+.forecast-label{
+  font-family:var(--cond);font-size:11px;font-weight:700;letter-spacing:1.5px;
+  text-transform:uppercase;color:var(--accent);margin-bottom:4px;
+}
+.forecast-text{font-family:var(--sans);font-size:13px;color:#ffffff;line-height:1.5;}
+.forecast-trend-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
+.trend-tag{
+  font-family:var(--cond);font-size:10px;letter-spacing:0.8px;text-transform:uppercase;
+  padding:3px 9px;border-radius:12px;background:rgba(255,255,255,0.05);
+  border:1px solid var(--border);color:var(--muted);
+}
+.trend-tag.tag-up{color:#ff8c42;border-color:rgba(255,140,66,0.3);}
+.trend-tag.tag-down{color:#3fcf82;border-color:rgba(63,207,130,0.3);}
+.trend-tag.tag-warn{color:#ff5f5f;border-color:rgba(255,95,95,0.35);}
+
 /* Raw rows */
 tr.raw td{
   background:var(--raw-bg);text-align:left;color:#ffffff;
@@ -560,7 +631,7 @@ tr.taf-change-row td.wx-critical{color:var(--alert)!important;background:var(--a
         </table>
         <div class="status-bar">
           <span><span class="dot-live"></span><span id="last-updated">METAR last updated: --:--</span></span>
-          <span style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:rgba(106,138,170,0.5);">Auto-refresh every 30s</span>
+          <span style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:rgba(106,138,170,0.5);">Click ICAO for 6h history &amp; outlook · Auto-refresh every 30s</span>
         </div>
       </div>
     </div>
@@ -881,15 +952,30 @@ function buildMetarTable(){
   STATIONS.forEach(icao=>{
     metarState[icao]=metarState[icao]||{lastTime:null,lastRaw:null,pastRaw:null,row:null,rawEl:null,pastEl:null,highlightTimeout:null,stats:{winds:[],temps:[],vis:[],wxSummary:''}};
     const tr=document.createElement('tr');
+    tr.className='data-row';
+    tr.dataset.icao=icao;
     const rr=document.createElement('tr');
     rr.className='raw';
     tr.innerHTML=`<td class="station">${icao}</td><td class="time">--</td><td class="wind">--</td><td>--</td><td class="wx">--</td><td class="clouds">--</td><td>--</td><td>--</td>`;
     rr.innerHTML=`<td colspan="8"><span class="raw-current"></span><span class="raw-past"></span></td>`;
+
+    // History / forecast expandable row — lazily populated on first click
+    const hr=document.createElement('tr');
+    hr.className='history-row';
+    hr.dataset.icao=icao;
+    hr.innerHTML=`<td colspan="8"><div class="history-panel" id="history-panel-${icao}"></div></td>`;
+
     metarTbody.appendChild(tr);
     metarTbody.appendChild(rr);
+    metarTbody.appendChild(hr);
     metarState[icao].row=tr;
     metarState[icao].rawEl=rr.querySelector('.raw-current');
     metarState[icao].pastEl=rr.querySelector('.raw-past');
+
+    tr.querySelector('td.station').addEventListener('click',(e)=>{
+      e.stopPropagation(); // prevent the cell-copy handler on #metar from firing for this tap
+      toggleHistoryPanel(icao);
+    });
   });
 }
 buildMetarTable();
@@ -912,6 +998,34 @@ function extractWindSpeedFromWindBase(windBase){
   if(!m)return 0;
   const speed=parseInt(m[2],10);
   return isNaN(speed)?0:speed;
+}
+
+/* ── SESSION-COLLECTED METAR HISTORY (fallback when NOAA history is unavailable) ── */
+const metarHistorySession={};
+STATIONS.forEach(i=>{metarHistorySession[i]=[];});
+const HISTORY_WINDOW_MS=6*60*60*1000;
+
+function metarTimeTokenToDate(timeStr){
+  if(!/^\d{6}Z$/.test(timeStr||''))return null;
+  const now=new Date();
+  const dd=parseInt(timeStr.slice(0,2),10),hh=parseInt(timeStr.slice(2,4),10),mm=parseInt(timeStr.slice(4,6),10);
+  let d=new Date(Date.UTC(now.getUTCFullYear(),now.getUTCMonth(),dd,hh,mm));
+  // If the resulting date looks like it's in the future (rollover at month boundary), step back a month
+  if(d.getTime()-now.getTime()>6*60*60*1000){
+    d=new Date(Date.UTC(now.getUTCFullYear(),now.getUTCMonth()-1,dd,hh,mm));
+  }
+  return d;
+}
+
+function pushSessionHistory(icao,raw,parsed){
+  const list=metarHistorySession[icao];
+  if(!list)return;
+  const t=metarTimeTokenToDate(parsed.time)||new Date();
+  if(list.length&&list[0].raw===raw)return; // dedupe identical
+  list.unshift({time:t,raw});
+  const cutoff=Date.now()-HISTORY_WINDOW_MS;
+  while(list.length&&list[list.length-1].time.getTime()<cutoff)list.pop();
+  if(list.length>40)list.length=40;
 }
 
 function renderMetar(icao,raw){
@@ -959,7 +1073,7 @@ function renderMetar(icao,raw){
     const tsPresent=/\b(?:TS|TSRA|VCTS)\b/i.test(parsed.wx);
     const cloudFlag=isCloudGroupWithCbTcu(parsed.cld);
     const wxCritical=setWxCritical(tds[4],parsed.wx);
-    if(isNew){playBeep();markTimeUpdated(icao);}
+    if(isNew){playBeep();markTimeUpdated(icao);pushSessionHistory(icao,state.lastRaw,parsed);}
     if(windHasGust&&isNew)tds[2].classList.add('alert');
     if(!isNaN(parsed.visMin)&&parsed.visMin<=5000)tds[3].classList.add('alert');
     if(wxCritical)tds[4].classList.add('alert');
@@ -1110,6 +1224,7 @@ function sanitizeTextForDisplay(text){
 
 /* ── BUILD TAF TABLE ── */
 const TAF_ICAOS = STATIONS.slice(0,3); // TNCA, TNCB, TNCC
+const tafDataStore={}; // icao -> last parsed TAF object, used by the METAR history/forecast panel
 
 function buildTafTable(){
   tafTbody.innerHTML='';
@@ -1143,6 +1258,10 @@ function renderTafRow(icao, rawText){
   const clean=sanitizeTextForDisplay(rawText);
   const parsed=parseTaf(clean);
   if(!parsed)return;
+  tafDataStore[icao]=parsed;
+  // If this station's history panel is currently open, refresh its forecast box with the new TAF
+  const openRow=document.querySelector(`tr.history-row[data-icao="${icao}"].open`);
+  if(openRow)renderForecastBox(icao);
 
   // ── BASE ROW ──
   const tr=tafTbody.querySelector(`tr[data-taf-base][data-icao="${icao}"]`);
@@ -1197,6 +1316,194 @@ async function loadTafRow(icao){
   }catch(e){console.error('loadTafRow error',icao,e);}
 }
 async function loadAllTafs(){await Promise.all(TAF_ICAOS.map(i=>loadTafRow(i)));}
+
+/* ════════════════════════════════════════════════════
+   6-HOUR HISTORY + MINI FORECAST (click a METAR row)
+════════════════════════════════════════════════════ */
+const STATION_FULL_NAMES={
+  'TNCA':'Aruba — Queen Beatrix','TNCB':'Bonaire — Flamingo','TNCC':'Curaçao — Hato',
+  'TNCM':'Sint Maarten — Princess Juliana','SVMI':'Caracas — Simón Bolívar','SVVA':'Valencia — Arturo Michelena'
+};
+
+/* Try the AviationWeather.gov JSON history API (last 6h). Returns array of {time,raw} or null on failure. */
+async function fetchMetarHistoryNOAA(icao){
+  try{
+    const url=`https://aviationweather.gov/api/data/metar?ids=${icao}&format=json&hours=6`;
+    const out=await fetchWithRetries(url,2);
+    if(!out||!out.ok||!out.text)return null;
+    let data;
+    try{data=JSON.parse(out.text);}catch(e){return null;}
+    if(!Array.isArray(data)||!data.length)return null;
+    const records=data.map(r=>{
+      const rawOb=r.rawOb||r.raw_text||r.metar||'';
+      let t=null;
+      if(r.obsTime)t=new Date(r.obsTime*1000);
+      else if(r.reportTime)t=new Date(r.reportTime);
+      return rawOb?{time:t||new Date(),raw:rawOb}:null;
+    }).filter(Boolean);
+    if(!records.length)return null;
+    records.sort((a,b)=>b.time.getTime()-a.time.getTime());
+    return records;
+  }catch(e){console.warn('NOAA history fetch failed',icao,e);return null;}
+}
+
+/* Resolve the best available history list: NOAA first, session-collected as fallback. */
+async function resolveHistory(icao){
+  const noaa=await fetchMetarHistoryNOAA(icao);
+  if(noaa&&noaa.length)return{source:'NOAA (6h)',records:noaa};
+  const session=metarHistorySession[icao]||[];
+  if(session.length)return{source:'Session-observed',records:session.slice()};
+  return{source:null,records:[]};
+}
+
+function formatHistTime(d){
+  if(!d)return'--';
+  return `${String(d.getUTCDate()).padStart(2,'0')}/${String(d.getUTCHours()).padStart(2,'0')}:${String(d.getUTCMinutes()).padStart(2,'0')}Z`;
+}
+
+function buildHistoryTableHtml(records){
+  if(!records.length)return'<div class="history-empty">No observations available for the past 6 hours.</div>';
+  const rows=records.slice(0,14).map((rec,i)=>{
+    const p=parseMetar(rec.raw);
+    const isLatest=i===0;
+    return `<tr>
+      <td class="h-time">${formatHistTime(rec.time)}</td>
+      <td>${p.wind}</td>
+      <td>${p.vis}</td>
+      <td>${p.wx}</td>
+      <td>${p.cld}</td>
+      <td>${p.qnh!=='—'?p.qnh.split(' / ')[0]:'—'}</td>
+    </tr>`;
+  }).join('');
+  return `<div class="history-table-wrap"><table class="history-table">
+    <thead><tr><th>Time (Z)</th><th>Wind</th><th>Vis</th><th>Wx</th><th>Cloud</th><th>QNH</th></tr></thead>
+    <tbody>${rows}</tbody>
+  </table></div>`;
+}
+
+/* Simple trend extrapolation from the available history window */
+function computeTrend(records){
+  if(records.length<2)return null;
+  const sorted=records.slice().sort((a,b)=>a.time.getTime()-b.time.getTime());
+  const first=parseMetar(sorted[0].raw), last=parseMetar(sorted[sorted.length-1].raw);
+  const firstWind=extractWindSpeedFromWindBase(first.windBase),lastWind=extractWindSpeedFromWindBase(last.windBase);
+  const windDelta=lastWind-firstWind;
+  const visDelta=(!isNaN(first.visMin)&&!isNaN(last.visMin))?(last.visMin-first.visMin):0;
+  let qnhDelta=0;
+  const qFirst=parseInt(first.qnh,10),qLast=parseInt(last.qnh,10);
+  if(!isNaN(qFirst)&&!isNaN(qLast))qnhDelta=qLast-qFirst;
+  const tags=[];
+  if(windDelta>=5)tags.push({label:'Wind increasing',cls:'tag-up'});
+  else if(windDelta<=-5)tags.push({label:'Wind easing',cls:'tag-down'});
+  if(visDelta<=-2000)tags.push({label:'Vis dropping',cls:'tag-warn'});
+  else if(visDelta>=2000)tags.push({label:'Vis improving',cls:'tag-down'});
+  if(qnhDelta<=-2)tags.push({label:'Pressure falling',cls:'tag-warn'});
+  else if(qnhDelta>=2)tags.push({label:'Pressure rising',cls:'tag-up'});
+  const latestTs=/\b(?:TS|TSRA|VCTS)\b/i.test(last.wx);
+  if(latestTs)tags.push({label:'Thunderstorm active',cls:'tag-warn'});
+  return{windDelta,visDelta,qnhDelta,tags,latest:last};
+}
+
+function pickForecastIcon(latest,tags){
+  const tagLabels=tags.map(t=>t.label).join(' ');
+  if(/\b(?:TS|TSRA|VCTS)\b/i.test(latest.wx))return'⛈️';
+  if(/Vis dropping/.test(tagLabels))return'🌫️';
+  if(/SHRA|RA|DZ/i.test(latest.wx))return'🌧️';
+  if(/OVC/i.test(latest.cld))return'☁️';
+  if(/BKN/i.test(latest.cld))return'🌥️';
+  if(/Wind increasing/.test(tagLabels))return'💨';
+  if(/SCT|FEW/i.test(latest.cld))return'🌤️';
+  return'☀️';
+}
+
+function buildForecastText(icao,trend){
+  const taf=tafDataStore[icao];
+  const parts=[];
+  if(taf&&taf.base){
+    parts.push(`TAF base: ${taf.base.wind!=='--'?taf.base.wind:'calm winds'}, vis ${taf.base.vis}${taf.base.wx!=='--'?', '+taf.base.wx:''}.`);
+    if(taf.changes&&taf.changes.length){
+      const next=taf.changes[0];
+      parts.push(`Next change (${next.label}${next.period?' '+next.period:''}): ${next.wind!=='--'?next.wind:'winds unchanged'}${next.wx!=='--'?', '+next.wx:''}.`);
+    }
+  } else {
+    parts.push('No TAF available for this station — outlook based on recent trend only.');
+  }
+  if(trend&&trend.tags.length){
+    parts.push('Trend: '+trend.tags.map(t=>t.label).join(', ')+'.');
+  } else if(trend){
+    parts.push('Conditions steady over the observed period.');
+  }
+  return parts.join(' ');
+}
+
+function renderForecastBox(icao){
+  const panel=document.getElementById(`history-panel-${icao}`);
+  if(!panel)return;
+  let box=panel.querySelector('.forecast-box');
+  const records=panel.__lastRecords||[];
+  const trend=computeTrend(records);
+  const latest=records.length?parseMetar(records[0].raw):null;
+  const icon=latest?pickForecastIcon(latest,trend?trend.tags:[]):'❔';
+  const text=buildForecastText(icao,trend);
+  const tagsHtml=(trend&&trend.tags.length)?trend.tags.map(t=>`<span class="trend-tag ${t.cls}">${t.label}</span>`).join(''):'';
+  const html=`
+    <div class="forecast-icon">${icon}</div>
+    <div class="forecast-body">
+      <div class="forecast-label">Outlook · ${STATION_FULL_NAMES[icao]||icao}</div>
+      <div class="forecast-text">${text}</div>
+      ${tagsHtml?`<div class="forecast-trend-tags">${tagsHtml}</div>`:''}
+    </div>`;
+  if(box){box.innerHTML=html;}
+  else{
+    box=document.createElement('div');
+    box.className='forecast-box';
+    box.innerHTML=html;
+    panel.appendChild(box);
+  }
+}
+
+async function loadHistoryAndForecast(icao){
+  const panel=document.getElementById(`history-panel-${icao}`);
+  if(!panel)return;
+  panel.innerHTML=`<div class="history-loading">Loading 6-hour history…</div>`;
+  const {source,records}=await resolveHistory(icao);
+  panel.__lastRecords=records;
+  const header=`
+    <div class="history-panel-header">
+      <div class="history-panel-title">Past 6 Hours — ${icao}</div>
+      <div class="history-panel-sub">${source?`Source: ${source}`:'No history source available'}</div>
+    </div>`;
+  const tableHtml=buildHistoryTableHtml(records);
+  panel.innerHTML=header+tableHtml;
+  renderForecastBox(icao);
+  // Make sure TAF for this station is loaded so the forecast box has data (only for TNCA/TNCB/TNCC)
+  if(TAF_ICAOS.includes(icao)&&!tafDataStore[icao]){
+    loadTafRow(icao).then(()=>{if(document.querySelector(`tr.history-row[data-icao="${icao}"].open`))renderForecastBox(icao);});
+  }
+}
+
+function toggleHistoryPanel(icao){
+  const dataRow=document.querySelector(`tr.data-row[data-icao="${icao}"]`);
+  const historyRow=document.querySelector(`tr.history-row[data-icao="${icao}"]`);
+  if(!dataRow||!historyRow)return;
+  const isOpen=historyRow.classList.contains('open');
+  if(isOpen){
+    historyRow.classList.remove('open');
+    dataRow.classList.remove('expanded');
+  } else {
+    // Close any other open panel for a cleaner single-focus view
+    document.querySelectorAll('tr.history-row.open').forEach(r=>{
+      r.classList.remove('open');
+      const otherIcao=r.dataset.icao;
+      const otherRow=document.querySelector(`tr.data-row[data-icao="${otherIcao}"]`);
+      if(otherRow)otherRow.classList.remove('expanded');
+    });
+    historyRow.classList.add('open');
+    dataRow.classList.add('expanded');
+    loadHistoryAndForecast(icao);
+  }
+}
+
 
 /* ── SYNOP ── */
 function buildSynopTable(){
@@ -1282,7 +1589,7 @@ document.getElementById('metar')?.addEventListener('click',async e=>{
   const td=e.target.closest('td');
   if(!td)return;
   const tr=td.closest('tr');
-  if(!tr||tr.classList.contains('raw'))return;
+  if(!tr||tr.classList.contains('raw')||tr.classList.contains('history-row'))return;
   const text=td.textContent.trim();
   if(!text)return;
   try{
