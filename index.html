@@ -601,6 +601,7 @@ tr.taf-change-row td.wx-critical{color:var(--alert)!important;background:var(--a
     <div class="controls-wrap" role="toolbar" aria-label="Controls">
       <div class="btn-row">
         <button id="mute-btn" class="btn-ghost" aria-pressed="false">🔊 Mute</button>
+        <button id="notify-btn" class="btn-ghost" aria-pressed="false" title="Browser notifications for the TNCA special alarm">🔔 Notify: Off</button>
         <button id="test-btn" class="btn-ghost">⚗ Test Mode</button>
         <button id="night-btn" class="btn-ghost" aria-pressed="false" title="Toggle Night Mode">🌙 Night</button>
       </div>
@@ -811,6 +812,55 @@ function playSpecialAlarm(){
   playCriticalAlarm();
   setTimeout(()=>{playCriticalAlarm();},850);
 }
+
+/* ── BROWSER NOTIFICATIONS ── */
+let notificationsEnabled=false;
+function updateNotifyButton(){
+  const b=document.getElementById('notify-btn');
+  if(!b)return;
+  if(!('Notification' in window)){
+    b.textContent='🔔 Not Supported';b.disabled=true;b.setAttribute('aria-pressed','false');return;
+  }
+  if(Notification.permission==='denied'){
+    b.textContent='🔕 Blocked';b.setAttribute('aria-pressed','false');b.title='Notifications were blocked in browser settings';return;
+  }
+  b.textContent=notificationsEnabled?'🔔 Notify: On':'🔔 Notify: Off';
+  b.setAttribute('aria-pressed',String(notificationsEnabled));
+  b.style.color=notificationsEnabled?'var(--ok)':'var(--accent)';
+}
+async function toggleNotifications(){
+  if(!('Notification' in window)){updateNotifyButton();return;}
+  if(!notificationsEnabled){
+    let perm=Notification.permission;
+    if(perm==='default'){try{perm=await Notification.requestPermission();}catch(e){}}
+    if(perm==='granted'){
+      notificationsEnabled=true;
+      try{localStorage.setItem('rwc-notify-enabled','1');}catch(e){}
+      try{new Notification('Regional Weather Centre',{body:'Notifications enabled — you will be alerted on the TNCA special alarm (gust ≥35kt with TS/TSRA).',icon:undefined,silent:false});}catch(e){}
+    }
+  } else {
+    notificationsEnabled=false;
+    try{localStorage.setItem('rwc-notify-enabled','0');}catch(e){}
+  }
+  updateNotifyButton();
+}
+function sendAlarmNotification(icao,parsed){
+  if(!notificationsEnabled||!('Notification' in window)||Notification.permission!=='granted')return;
+  try{
+    const n=new Notification(`⚠ Special Alarm — ${icao}`,{
+      body:`Gust ${parsed.gust||extractWindSpeedFromWindBase(parsed.windBase)}kt with ${parsed.wx} — immediate attention required.\n${parsed.raw||''}`,
+      tag:`special-alarm-${icao}`,
+      requireInteraction:true,
+      silent:false
+    });
+    n.onclick=()=>{try{window.focus();}catch(e){}n.close();};
+  }catch(e){console.warn('Notification failed',e);}
+}
+try{
+  if(localStorage.getItem('rwc-notify-enabled')==='1'&&'Notification' in window&&Notification.permission==='granted'){
+    notificationsEnabled=true;
+  }
+}catch(e){}
 
 /* ── FETCH ── */
 async function fetchWithTimeout(url,timeout=REQUEST_TIMEOUT_MS,opts={}){
@@ -1130,9 +1180,9 @@ function renderMetar(icao,raw){
     if(!isNaN(parsed.visMin)&&parsed.visMin<=5000)tds[3].classList.add('alert');
     if(wxCritical)tds[4].classList.add('alert');
     if(cloudFlag)tds[5].classList.add('cloud-critical');
-    // ── SPECIAL ALARM ── only TNCA, gust ≥35kt, AND TS/TSRA present. Sounds twice.
+    // ── SPECIAL ALARM ── only TNCA, gust ≥35kt, AND TS/TSRA present. Sounds twice + browser notification.
     const isSpecialAlarmCondition=(icao==='TNCA'&&gustValue>=35&&tsPresent);
-    if(isNew&&isSpecialAlarmCondition)playSpecialAlarm();
+    if(isNew&&isSpecialAlarmCondition){playSpecialAlarm();sendAlarmNotification(icao,parsed);}
     if(typeof windSpeed==='number'){state.stats.winds.push(windSpeed);if(state.stats.winds.length>200)state.stats.winds.shift();}
     if(parsed.td&&typeof parsed.td==='string'){const m=parsed.td.match(/^(M?)(\d{1,2})\/(M?)(\d{1,2})$/);if(m){const sign=m[1]==='M'?-1:1;const tempVal=sign*parseInt(m[2],10);state.stats.temps.push(tempVal);if(state.stats.temps.length>200)state.stats.temps.shift();}}
     if(!isNaN(parsed.visMin)){state.stats.vis.push(parsed.visMin);if(state.stats.vis.length>200)state.stats.vis.shift();}
@@ -1625,6 +1675,8 @@ document.getElementById('taf-refresh-btn')?.addEventListener('click',async()=>{c
 document.getElementById('synop-refresh-btn')?.addEventListener('click',async()=>{const btn=document.getElementById('synop-refresh-btn');btn.disabled=true;try{await loadAllSynops();}catch(e){}setTimeout(()=>btn.disabled=false,800);});
 document.getElementById('vis-refresh-btn')?.addEventListener('click',async()=>{const btn=document.getElementById('vis-refresh-btn');btn.disabled=true;try{await updateVisFromKnmi();}catch(e){}setTimeout(()=>btn.disabled=false,800);});
 document.getElementById('mute-btn')?.addEventListener('click',()=>{const b=document.getElementById('mute-btn');mute=!mute;b.setAttribute('aria-pressed',String(mute));b.textContent=mute?'🔇 Unmute':'🔊 Mute';});
+document.getElementById('notify-btn')?.addEventListener('click',toggleNotifications);
+updateNotifyButton();
 document.getElementById('test-btn')?.addEventListener('click',()=>{testMode=!testMode;const b=document.getElementById('test-btn');if(b)b.textContent=testMode?'⚗ Exit Test':'⚗ Test Mode';if(testMode)startTestRunner();else stopTestRunner();});
 document.getElementById('night-btn')?.addEventListener('click',()=>{
   const b=document.getElementById('night-btn');
